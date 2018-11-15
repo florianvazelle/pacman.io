@@ -33,7 +33,14 @@ const app = new Koa();
 http.createServer(app.callback());
 app.use(serve('./public'));
 
-var server = app.listen(port, hostname);
+var server = app.listen(port, hostname, listen);
+
+function listen(){
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log("App listening at http://" + host + ":" + port);
+}
+
 var io = require('socket.io').listen(server);
 
 setInterval(heartbeat, 33);
@@ -56,7 +63,6 @@ function connection(socket){
     console.log("Nouveau client: " + socket.id);
         
     socket.on('start', (data) => {
-	console.log("Start: " + socket.id + " " +  data.x + " " +  data.y + " " + data.score);
 	var new_pacman = new Pacman(socket.id, data.x, data.y, data.score);
 	liste_pacman.push(new_pacman);
     });    

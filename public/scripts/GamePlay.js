@@ -142,6 +142,22 @@ var gamePlayState = new Phaser.Class({
 		    }
 		}
 	    });
+	    //le troisieme cas est celui ou un joueur c'est deconnecte
+	    //il faut donc supprimer sa physics
+	    if(data.length < pacmans.length + 1){
+		pacmans.forEach((pcm, idx) => {
+		    var exist = false;
+		    data.forEach((pac) => {
+			if(pac.id == pcm.id){
+			    exist = true;
+			}
+		    });
+		    if(!exist){
+			pacmans[idx].destroy(true);
+			pacmans.splice(idx, 1);
+		    }
+		});
+	    }
 	});
     },
     
