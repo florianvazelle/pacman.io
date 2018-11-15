@@ -36,8 +36,12 @@ app.use(serve('./public'));
 var server = app.listen(port, hostname);
 var io = require('socket.io').listen(server);
 
-io.set('heartbeat interval', 33);
-io.sockets.emit('heartbeat', liste_pacman);
+setInterval(heartbeat, 33);
+
+function heartbeat(){
+    io.sockets.emit('heartbeat', liste_pacman);
+}
+    
 io.sockets.on('connection', connection);
 
 /**

@@ -16,6 +16,24 @@ var gamePlayState = new Phaser.Class({
 		frameHeight: 15
 	    }
 	);
+
+	this.load.spritesheet(
+	    "pacman",
+	    "./img/pacman_red_sprite.png",
+	    {
+		frameWidth: 14,
+		frameHeight: 15
+	    }
+	);
+
+	this.load.spritesheet(
+	    "pacman",
+	    "./img/pacman_green_sprite.png",
+	    {
+		frameWidth: 14,
+		frameHeight: 15
+	    }
+	);
     },
 
     create: function() {
@@ -58,6 +76,8 @@ var gamePlayState = new Phaser.Class({
 	
 	//create_ground();
 
+	enemies = this.physics.add.group();
+		
 	enemy = this.add.graphics({ lineStyle: { color: 0xff0000 } });
 	food = this.add.graphics({ lineStyle: { color: 0x00ff00 } });
 	neutral = this.add.graphics({ lineStyle: { color: 0xffff00 } });
@@ -77,35 +97,55 @@ var gamePlayState = new Phaser.Class({
 	socket.emit('start', data);
 
 	socket.on('heartbeat', (data) => {
-	    pacmans = data;
+	    //on veut partir d'un tableau de Pacman      => data
+	    //pour arriver a un tableau d'objet physiaue => pacmans
+	    
+	    //on parcours data
+	    data.forEach((pac) => {
+		if(pac.id != socket.id){
+		    //si le pacman existe deja dans le tableau pacmans on le met juste a jour
+		    //pour cela on parcours la table pacmans
+		    var exist = -1;
+		    pacmans.forEach((pcm, idx) => {
+			if(pac.id == pcm.id){
+			    exist = idx;
+			}
+		    });
+		    
+		    if(exist != -1){
+			pacmans[exist];
+			if(pac.score > pacmans[exist].score && pacmans[exist].texture != "red"){
+			    pacmans[exist].setTexture("pacman_red");
+			    pacmans[exist].texture = "red";
+			}
+			if(pac.score < pacman.score && pacmans[exist].texture != "green"){
+			    pacmans[exist].setTexture("pacman_green");
+			    pacmans[exist].texture = "green";
+			}
+			else if(pacmans[exist].texture != "yellow") {
+			    pacmans[exist].setTexture("pacman");
+			    pacmans[exist].texture = "yellow";
+			}
+			
+			pacmans[exist].x = pac.x;
+			pacmans[exist].y = pac.y;
+		    }
+		    //sinon on construit l'objet physics
+		    else {
+			var new_pacman = this.physics.add.sprite(w_shape, w_shape, "pacman");
+			new_pacman.id = pac.id;
+			new_pacman.x = random(cols) * 10;
+			new_pacman.y = random(rows) * 10;
+			new_pacman.score = 0;
+			
+			pacmans.push(new_pacman);
+		    }
+		}
+	    });
 	});
     },
-
+    
     update: function() {
-	//effacer ellipse
-
-	//Afficher les autres joueurs
-	pacmans.forEach((pac) => {
-	    if(pac.id.localeCompare(socket.id) != 0){
-		if(pac.score > pacman.score){
-		    ellipse.setPosition(pac.x, pac.y);
-		    enemy.strokeEllipseShape(ellipse);
-		    //draw ennemy (pacman rouge)
-		}
-		if(pac.score < pacman.score){
-		    ellipse.setPosition(pac.x, pac.y);
-		    food.strokeEllipseShape(ellipse);
-		    //draw pacman vert (que l'on peut manger)
-		}
-		else {
-		    ellipse.setPosition(pac.x, pac.y);
-		    neutral.strokeEllipseShape(ellipse);
-		    //draw pacman jaune, neutre
-		}
-		liste_ellipse.push(ellipse);
-	    }
-	});
-    	
 	if (upKey.isDown){
 	    pacman.y -= w_shape;
 	    pacman.anims.play("up", 30);
@@ -114,7 +154,7 @@ var gamePlayState = new Phaser.Class({
 	    pacman.y += w_shape;
 	    pacman.anims.play("down", 30);
 	}
-
+	
 	if (leftKey.isDown){
 	    pacman.x -= w_shape;
 	    pacman.anims.play("left", 30);
