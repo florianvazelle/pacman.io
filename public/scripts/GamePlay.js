@@ -12,26 +12,25 @@ var gamePlayState = new Phaser.Class({
     this.load.spritesheet(
       "pacman",
       "./img/pacman_sprite.png", {
-        frameWidth: 14,
-        frameHeight: 15
-      }
-    );
+        frameWidth: 100,
+        frameHeight: 100
+      });
 
     this.load.spritesheet(
       "pacman_red",
       "./img/pacman_red_sprite.png", {
-        frameWidth: 14,
-        frameHeight: 15
-      }
-    );
+        frameWidth: 100,
+        frameHeight: 100
+      });
 
     this.load.spritesheet(
       "pacman_green",
       "./img/pacman_green_sprite.png", {
-        frameWidth: 14,
-        frameHeight: 15
-      }
-    );
+        frameWidth: 100,
+        frameHeight: 100
+      });
+
+    this.load.image("ball", "./img/ball.png");
   },
 
   create: function() {
@@ -40,9 +39,13 @@ var gamePlayState = new Phaser.Class({
 
     // Create player
     pacman = this.physics.add.sprite(w_shape, w_shape, "pacman");
-    pacman.x = random(cols) * 10;
-    pacman.y = random(rows) * 10;
+    pacman.x = random(cols) * w_shape;
+    pacman.y = random(rows) * w_shape;
     pacman.score = 0;
+
+    //Scale pacman
+    pacman.setDisplaySize(w_shape, w_shape);
+    //pacman.setSize(w_shape, w_shape)
 
     // Create animations for player
     this.anims.create({
@@ -84,19 +87,56 @@ var gamePlayState = new Phaser.Class({
     leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
-    //create_ground();
+    //show background
+
+    // Create walls
+    walls = this.physics.add.staticGroup();
+    // Create balls
+    balls = this.physics.add.staticGroup();
+
+    map.forEach((cell) => {
+      var x = calc(cell.x) * w_shape;
+      var y = calc(cell.y) * w_shape;
+      myCreate(x, y, balls, 'ball');
+      cell.walls.forEach((wall, idx) => {
+        if (!wall) {
+          if (idx == 0) myCreate(x + w_shape, y, walls, 'wall_right');
+          if (idx == 1) myCreate(x - w_shape, y, walls, 'wall_left');
+          if (idx == 2) myCreate(x, y + w_shape, walls, 'wall_down');
+          if (idx == 3) myCreate(x, y - w_shape, walls, 'wall_up');
+        } else {
+          if (idx == 0) myCreate(x + w_shape, y, balls, 'ball');
+          if (idx == 1) myCreate(x - w_shape, y, balls, 'ball');
+          if (idx == 2) myCreate(x, y + w_shape, balls, 'ball');
+          if (idx == 3) myCreate(x, y - w_shape, balls, 'ball');
+        }
+      });
+    });
+
+    balls.refresh();
+    walls.refresh();
+
+    // Add collider between player and walls
+    this.physics.add.collider(pacman, walls);
+
+    // Add overlap between player and balls
+    this.physics.add.overlap(pacman, balls,
+      (pacman, ball) => {
+        //ball.disableBody(true, true);
+        ball.destroy(true);
+        //pacman.score++;
+      }, null, this);
+
+    //Fin show background
 
     enemy = this.physics.add.group({
-      key: "pacman_red",
-      visible: 0
+      key: "pacman_red"
     });
     food = this.physics.add.group({
-      key: "pacman_green",
-      visible: 0
+      key: "pacman_green"
     });
     neutral = this.physics.add.group({
-      key: "pacman",
-      visible: 0
+      key: "pacman"
     });
 
     // Get camera
@@ -138,7 +178,7 @@ var gamePlayState = new Phaser.Class({
               oldGroup = (neutral.contains(pacmans[exist])) ? neutral : food;
               oldGroup.destroy(pacmans[exist]);
               enemy.add(pacmans[exist]);
-            } else if (pac.score < pacman.score && !foo.contains(pacmans[exist])) {
+            } else if (pac.score < pacman.score && !food.contains(pacmans[exist])) {
               oldGroup = (neutral.contains(pacmans[exist])) ? neutral : enemy;
               oldGroup.destroy(pacmans[exist]);
               food.add(pacmans[exist]);
@@ -164,6 +204,9 @@ var gamePlayState = new Phaser.Class({
             } else if (0 == pacman.score) {
               neutral.add(new_pacman);
             }
+
+            //new_pacman.setDisplaySize(w_shape, w_shape);
+            //new_pacman.setSize(w_shape, w_shape)
 
             pacmans.push(new_pacman);
           }
@@ -211,7 +254,7 @@ var gamePlayState = new Phaser.Class({
       score: pacman.score
     };
     socket.emit('update', data);
-  }
+  },
 });
 
 // Add scene to list of scenes
@@ -227,40 +270,4 @@ myGame.scenes.push(gamePlayState);
 
 function calc(n) {
   return 3 * n + 1;
-}
-
-function create_ground() {
-  // Create walls
-  walls = this.physics.add.staticGroup();
-  // Create balls
-  balls = this.physics.add.staticGroup();
-
-  map.forEach((cell) => {
-    var x = calc(cell.x) * w_shape;
-    var y = calc(cell.y) * w_shape;
-    balls.create(x, y, 'ball').setScale(0.1);;
-    cell.walls.forEach((wall, idx) => {
-      if (!wall) {
-        if (idx == 0) walls.create(x + w_shape, y, 'wall_right').setScale(0.1);
-        if (idx == 1) walls.create(x - w_shape, y, 'wall_left').setScale(0.1);
-        if (idx == 2) walls.create(x, y + w_shape, 'wall_down').setScale(0.1);
-        if (idx == 3) walls.create(x, y - w_shape, 'wall_up').setScale(0.1);
-      } else {
-        if (idx == 0) balls.create(x + w_shape, y, 'ball').setScale(0.1);
-        if (idx == 1) balls.create(x - w_shape, y, 'ball').setScale(0.1);
-        if (idx == 2) balls.create(x, y + w_shape, 'ball').setScale(0.1);
-        if (idx == 3) balls.create(x, y - w_shape, 'ball').setScale(0.1);
-      }
-    });
-  });
-
-  // Add collider between player and walls
-  this.physics.add.collider(pacman, walls);
-
-  // Add overlap between player and balls
-  this.physics.add.overlap(pacman, balls,
-    (pacman, ball) => {
-      ball.disableBody(true, true);
-      pacman.score++;
-    }, null, this);
 }

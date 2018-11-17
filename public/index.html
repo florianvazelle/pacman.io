@@ -8,11 +8,11 @@
 
     <!-- Socket.io -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-    
+
     <!-- my file -->
     <script type="text/javascript" src="./toolbox.js"></script>
     <script type="text/javascript" src="./maze.js"></script>
-    
+
     <!--  Include game files in the order that will be referenced  -->
     <script type="text/javascript" src="./scripts/GlobalVariables.js"></script>
     <script type="text/javascript" src="./scripts/Preload.js"></script>
@@ -39,10 +39,11 @@
       debug: true,
       physics: {
       default: 'arcade',
+      arcade: { debug: true }
       },
       scene: myGame.scenes
       };
-      
+
       //Instantiate the game with the config
       var game = new Phaser.Game(config);
     </script>

@@ -29,7 +29,7 @@ const w = 1;
 const cols = width / w;
 const rows = height / w;
 
-const w_shape = 10;
+const w_shape = 20;
 
 function maze() {
   map = initialize_map()
