@@ -4,21 +4,21 @@ var liste_pacman = [];
 
 class Pacman {
 
-    /**
-     * Creer un joueur
-     * 
-     * @param {string} id - L'identifiant de la socket et donc du joueur.
-     * @param {number} x - La valeur de x.
-     * @param {number} y - La valeur de y.
-     * @param {number} score - Le score du joueur.
-     */
-    
-    constructor(id, x, y, score){
-	this.id = id;
-	this.x = x;
-	this.y = y;
-	this.score = score;
-    }
+  /**
+   * Creer un joueur
+   *
+   * @param {string} id - L'identifiant de la socket et donc du joueur.
+   * @param {number} x - La valeur de x.
+   * @param {number} y - La valeur de y.
+   * @param {number} score - Le score du joueur.
+   */
+
+  constructor(id, x, y, score) {
+    this.id = id;
+    this.x = x;
+    this.y = y;
+    this.score = score;
+  }
 }
 
 const http = require('http');
@@ -35,58 +35,58 @@ app.use(serve('./public'));
 
 var server = app.listen(port, hostname, listen);
 
-function listen(){
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log("App listening at http://" + host + ":" + port);
+function listen() {
+  var host = server.address().address;
+  var port = server.address().port;
+  console.log("App listening at http://" + host + ":" + port);
 }
 
 var io = require('socket.io').listen(server);
 
 setInterval(heartbeat, 33);
 
-function heartbeat(){
-    io.sockets.emit('heartbeat', liste_pacman);
+function heartbeat() {
+  io.sockets.emit('heartbeat', liste_pacman);
 }
-    
+
 io.sockets.on('connection', connection);
 
 /**
- * Fonction appele lors d'une nouvelle 
+ * Fonction appele lors d'une nouvelle
  * connection au serveur
- * 
+ *
  * @param {Object} socket -
  */
 
-function connection(socket){
-    
-    console.log("Nouveau client: " + socket.id);
-        
-    socket.on('start', (data) => {
-	var new_pacman = new Pacman(socket.id, data.x, data.y, data.score);
-	liste_pacman.push(new_pacman);
-    });    
+function connection(socket) {
 
-    socket.on('update', (data) => {
-	var pacman;
-	for (var i = 0; i < liste_pacman.length; i++) {
-	    if (socket.id == liste_pacman[i].id) {
-		pacman = liste_pacman[i];
-	    }
-	}
-	console.log(pacman);
-	pacman.x = data.x;
-	pacman.y = data.y;
-	pacman.score = data.score;
-	
-    });
+  console.log("Nouveau client: " + socket.id);
 
-    socket.on('disconnect', () => {
-	console.log("un client s'est deconnecte");
-	liste_pacman.forEach((pacman, idx) => {
-	    if(pacman.id == socket.id){
-		liste_pacman.splice(idx, 1);
-	    }
-	});
+  socket.on('start', (data) => {
+    var new_pacman = new Pacman(socket.id, data.x, data.y, data.score);
+    liste_pacman.push(new_pacman);
+  });
+
+  socket.on('update', (data) => {
+    var pacman;
+    for (var i = 0; i < liste_pacman.length; i++) {
+      if (socket.id == liste_pacman[i].id) {
+        pacman = liste_pacman[i];
+      }
+    }
+    console.log(pacman);
+    pacman.x = data.x;
+    pacman.y = data.y;
+    pacman.score = data.score;
+
+  });
+
+  socket.on('disconnect', () => {
+    console.log("un client s'est deconnecte");
+    liste_pacman.forEach((pacman, idx) => {
+      if (pacman.id == socket.id) {
+        liste_pacman.splice(idx, 1);
+      }
     });
+  });
 }
