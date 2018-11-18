@@ -32,11 +32,10 @@ const rows = height / w;
 const w_shape = 20;
 
 function maze() {
-  map = initialize_map()
-  map = generate_maze(map);
-  map = check_contour(map);
+  var l_map = initialize_map()
+  l_map = generate_maze(l_map);
   if (DEBUG) console.log("Fin maze");
-  return map;
+  return l_map;
 }
 
 /**
@@ -51,16 +50,16 @@ function maze() {
 
 function initialize_map() {
   var map = [];
-  for (var i = 0; i < cols; i++) {
-    for (var j = 0; j < rows; j++) {
-      map.push(new Cell(i, j));
+  for (var i = 0; i < rows; i++) {
+    for (var j = 0; j < cols; j++) {
+      map.push(new Cell(j, i));
     }
   }
   return map;
 }
 
 /**
- * Recursive backtracker
+ * Recursive backtracker (wikipedia)
  *
  * @method generate_maze
  * @param {array} - La map.
@@ -73,15 +72,19 @@ function generate_maze(map) {
   var current_idx = 0;
   while (1) {
     map[current_idx].visited = true;
-    neighbours = check_neighbours(current_idx, map);
+    var neighbours = check_neighbours(current_idx, map);
     if (neighbours.length != 0) {
-      var index = Math.floor(Math.random() * neighbours.length);
+      //Choix au hasard d'un voisin non visite
+      var rdm = random(neighbours.length) - 1;
+      var neighbour = neighbours[rdm];
+      //Push l'index courant dans la pile
       stack.push(current_idx);
-
-      map[current_idx].walls[index] = true;
-      map[neighbours[index]].walls[((index == 3 || index == 1) ? index - 1 : index + 1)] = true;
-
-      current_idx = neighbours[index];
+      //Suppression des murs entre la cellule courante et le voisin choisis
+      map[current_idx].walls[neighbour.idx_wall] = true;
+      var n = (neighbour.idx_wall == 1 || neighbour.idx_wall == 3) ? -1 : 1;
+      map[neighbour.idx_map].walls[neighbour.idx_wall + n] = true;
+      //On fait de l'index du voisin choisis, l'index courant
+      current_idx = neighbour.idx_map;
     } else if (stack.length != 0) {
       current_idx = stack.pop();
     } else {
@@ -105,37 +108,40 @@ function generate_maze(map) {
 function check_neighbours(idx, map) {
   var neighbours = [];
   var cell = map[idx];
-  if (idx + 1 < rows * cols) {
+  if (idx % cols < modulo(idx + 1, cols)) {
     if (!map[idx + 1].visited) {
-      neighbours.push(idx + 1);
+      neighbours.push({
+        idx_map: idx + 1,
+        idx_wall: 0
+      });
     }
   }
-  if (idx - 1 >= 0) {
+  if (idx % cols > modulo(idx - 1, cols)) {
     if (!map[idx - 1].visited) {
-      neighbours.push(idx - 1);
+      neighbours.push({
+        idx_map: idx - 1,
+        idx_wall: 1
+      });
     }
   }
-  if (idx + rows < rows * cols) {
-    if (!map[idx + rows].visited) {
-      neighbours.push(idx + rows);
+  if (idx + cols < rows * cols) {
+    if (!map[idx + cols].visited) {
+      rows
+      neighbours.push({
+        idx_map: idx + cols,
+        idx_wall: 2
+      });
     }
   }
-  if (idx - rows >= 0) {
-    if (!map[idx - rows].visited) {
-      neighbours.push(idx - rows);
+  if (idx - cols >= 0) {
+    if (!map[idx - cols].visited) {
+      neighbours.push({
+        idx_map: idx - cols,
+        idx_wall: 3
+      });
     }
   }
   return neighbours;
-}
-
-function check_contour(map) {
-  map.forEach((cell, idx) => {
-    if (cell.x == 0) map[idx].walls[3] = false;
-    if (cell.x == cols - 1) map[idx].walls[2] = false;
-    if (cell.y == 0) map[idx].walls[1] = false;
-    if (cell.y == rows - 1) map[idx].walls[0] = false;
-  });
-  return map;
 }
 
 var map = maze();

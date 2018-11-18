@@ -8,10 +8,14 @@ function random(n) {
   return Math.floor((Math.random() * n) + 1);
 }
 
+function modulo(num, mod) {
+  return ((num % mod) + mod) % mod;
+}
+
 /**
  * Permet de creer dans un groupe un element physique, avec le sprite
  * correspondant et de le redimensionner (image et masque de collision)
- * en fonction de la valeur global w_shape 
+ * en fonction de la valeur global w_shape
  * Utilise pour la creation du terrain (boules et murs)
  *
  * @method myCreate
