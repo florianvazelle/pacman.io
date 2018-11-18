@@ -31,6 +31,7 @@ var gamePlayState = new Phaser.Class({
       });
 
     this.load.image("ball", "./img/ball.png");
+    this.load.image("wall", "./img/wall.png");
   },
 
   create: function() {
@@ -100,15 +101,31 @@ var gamePlayState = new Phaser.Class({
       myCreate(x, y, balls, 'ball');
       cell.walls.forEach((wall, idx) => {
         if (!wall) {
-          if (idx == 0) myCreate(x + w_shape, y, walls, 'wall_right');
-          if (idx == 1) myCreate(x - w_shape, y, walls, 'wall_left');
-          if (idx == 2) myCreate(x, y + w_shape, walls, 'wall_down');
-          if (idx == 3) myCreate(x, y - w_shape, walls, 'wall_up');
+          if (idx == 0) myCreate(x + w_shape, y, walls, 'wall').setRotation((3 * Math.PI) / 2);
+          if (idx == 1) myCreate(x - w_shape, y, walls, 'wall').setRotation(Math.PI / 2);
+          if (idx == 2) myCreate(x, y + w_shape, walls, 'wall');
+          if (idx == 3) myCreate(x, y - w_shape, walls, 'wall').setRotation(Math.PI);
         } else {
-          if (idx == 0) myCreate(x + w_shape, y, balls, 'ball');
-          if (idx == 1) myCreate(x - w_shape, y, balls, 'ball');
-          if (idx == 2) myCreate(x, y + w_shape, balls, 'ball');
-          if (idx == 3) myCreate(x, y - w_shape, balls, 'ball');
+          if (idx == 0) {
+            myCreate(x + w_shape, y, balls, 'ball');
+            myCreate(x + w_shape, y + w_shape, walls, 'wall');
+            myCreate(x + w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI);
+          }
+          if (idx == 1) {
+            myCreate(x - w_shape, y, balls, 'ball');
+            myCreate(x - w_shape, y + w_shape, walls, 'wall');
+            myCreate(x - w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI);
+          }
+          if (idx == 2) {
+            myCreate(x, y + w_shape, balls, 'ball');
+            myCreate(x + w_shape, y + w_shape, walls, 'wall').setRotation((3 * Math.PI) / 2);
+            myCreate(x - w_shape, y + w_shape, walls, 'wall').setRotation(Math.PI / 2);
+          }
+          if (idx == 3) {
+            myCreate(x, y - w_shape, balls, 'ball');
+            myCreate(x + w_shape, y - w_shape, walls, 'wall').setRotation((3 * Math.PI) / 2);
+            myCreate(x - w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI / 2);
+          }
         }
       });
     });

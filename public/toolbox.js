@@ -29,4 +29,5 @@ function myCreate(x, y, group, sprite) {
   elem = group.create(x, y, sprite);
   elem.setDisplaySize(w_shape, w_shape);
   elem.setSize(w_shape, w_shape);
+  return elem;
 }
