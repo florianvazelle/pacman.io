@@ -31,7 +31,12 @@ var gamePlayState = new Phaser.Class({
       });
 
     this.load.image("ball", "./img/ball.png");
-    this.load.image("wall", "./img/wall.png");
+
+    /* Walls */
+    this.load.image("u_wall", "./img/wall_up.png");
+    this.load.image("d_wall", "./img/wall_down.png");
+    this.load.image("l_wall", "./img/wall_left.png");
+    this.load.image("r_wall", "./img/wall_right.png");
   },
 
   create: function() {
@@ -43,6 +48,7 @@ var gamePlayState = new Phaser.Class({
     pacman.x = random(cols) * w_shape;
     pacman.y = random(rows) * w_shape;
     pacman.score = 0;
+    pacman.speed = 10;
 
     //Scale pacman
     pacman.setDisplaySize(w_shape, w_shape);
@@ -88,6 +94,7 @@ var gamePlayState = new Phaser.Class({
     leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
+
     //show background
 
     // Create walls
@@ -101,30 +108,30 @@ var gamePlayState = new Phaser.Class({
       myCreate(x, y, balls, 'ball');
       cell.walls.forEach((wall, idx) => {
         if (!wall) {
-          if (idx == 0) myCreate(x + w_shape, y, walls, 'wall').setRotation((3 * Math.PI) / 2);
-          if (idx == 1) myCreate(x - w_shape, y, walls, 'wall').setRotation(Math.PI / 2);
-          if (idx == 2) myCreate(x, y + w_shape, walls, 'wall');
-          if (idx == 3) myCreate(x, y - w_shape, walls, 'wall').setRotation(Math.PI);
+          if (idx == 0) myCreate(x + w_shape, y, walls, 'r_wall');
+          if (idx == 1) myCreate(x - w_shape, y, walls, 'l_wall');
+          if (idx == 2) myCreate(x, y + w_shape, walls, 'd_wall');
+          if (idx == 3) myCreate(x, y - w_shape, walls, 'u_wall');
         } else {
           if (idx == 0) {
             myCreate(x + w_shape, y, balls, 'ball');
-            myCreate(x + w_shape, y + w_shape, walls, 'wall');
-            myCreate(x + w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI);
+            myCreate(x + w_shape, y + w_shape, walls, 'd_wall');
+            myCreate(x + w_shape, y - w_shape, walls, 'u_wall');
           }
           if (idx == 1) {
             myCreate(x - w_shape, y, balls, 'ball');
-            myCreate(x - w_shape, y + w_shape, walls, 'wall');
-            myCreate(x - w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI);
+            myCreate(x - w_shape, y + w_shape, walls, 'd_wall');
+            myCreate(x - w_shape, y - w_shape, walls, 'u_wall');
           }
           if (idx == 2) {
             myCreate(x, y + w_shape, balls, 'ball');
-            myCreate(x + w_shape, y + w_shape, walls, 'wall').setRotation((3 * Math.PI) / 2);
-            myCreate(x - w_shape, y + w_shape, walls, 'wall').setRotation(Math.PI / 2);
+            myCreate(x + w_shape, y + w_shape, walls, 'r_wall');
+            myCreate(x - w_shape, y + w_shape, walls, 'l_wall');
           }
           if (idx == 3) {
             myCreate(x, y - w_shape, balls, 'ball');
-            myCreate(x + w_shape, y - w_shape, walls, 'wall').setRotation((3 * Math.PI) / 2);
-            myCreate(x - w_shape, y - w_shape, walls, 'wall').setRotation(Math.PI / 2);
+            myCreate(x + w_shape, y - w_shape, walls, 'r_wall');
+            myCreate(x - w_shape, y - w_shape, walls, 'l_wall');
           }
         }
       });
@@ -147,13 +154,25 @@ var gamePlayState = new Phaser.Class({
     //Fin show background
 
     enemy = this.physics.add.group({
-      key: "pacman_red"
+      key: "pacman_red",
+      setXY: {
+        x: -100,
+        y: -100
+      }
     });
     food = this.physics.add.group({
-      key: "pacman_green"
+      key: "pacman_green",
+      setXY: {
+        x: -100,
+        y: -100
+      }
     });
     neutral = this.physics.add.group({
-      key: "pacman"
+      key: "pacman",
+      setXY: {
+        x: -100,
+        y: -100
+      }
     });
 
     // Get camera
@@ -249,19 +268,19 @@ var gamePlayState = new Phaser.Class({
   },
 
   update: function() {
+    pacman.body.velocity.x = 0;
+    pacman.body.velocity.y = 0;
     if (upKey.isDown) {
-      pacman.y -= w_shape;
+      this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed, 33);
       pacman.anims.play("up", 30);
     } else if (downKey.isDown) {
-      pacman.y += w_shape;
+      this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed, 33);
       pacman.anims.play("down", 30);
-    }
-
-    if (leftKey.isDown) {
-      pacman.x -= w_shape;
+    } else if (leftKey.isDown) {
+      this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed, 33);
       pacman.anims.play("left", 30);
     } else if (rightKey.isDown) {
-      pacman.x += w_shape;
+      this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed, 33);
       pacman.anims.play("right", 30);
     }
 
