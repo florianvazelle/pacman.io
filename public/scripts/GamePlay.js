@@ -40,19 +40,63 @@ var gamePlayState = new Phaser.Class({
   },
 
   create: function() {
-    // Create objects
     console.log("GamePlay");
 
+    scoreText = this.add.text(16, 16, 'score: 0', {
+      fontSize: '32px',
+      fill: '#fff'
+    });
+
+    scoreText.setScrollFactor(0);
+
+    this.initPacman();
+
+    // Create Keyboard controls
+    upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+    downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+    leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+    rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
+    this.showMap();
+
+    enemy = this.physics.add.group({
+      key: "pacman_red",
+      setXY: {
+        x: -100,
+        y: -100
+      }
+    });
+    food = this.physics.add.group({
+      key: "pacman_green",
+      setXY: {
+        x: -100,
+        y: -100
+      }
+    });
+    neutral = this.physics.add.group({
+      key: "pacman",
+      setXY: {
+        x: -100,
+        y: -100
+      }
+    });
+
+    // Get camera
+    cam = this.cameras.main;
+    // Attach camera to player
+    cam.startFollow(pacman);
+
+    this.websocket();
+  },
+
+  initPacman: function() {
     // Create player
     pacman = this.physics.add.sprite(w_shape, w_shape, "pacman");
+    pacman.setDisplaySize(w_shape, w_shape);
     pacman.x = random(cols) * w_shape;
     pacman.y = random(rows) * w_shape;
     pacman.score = 0;
-    pacman.speed = 10;
-
-    //Scale pacman
-    pacman.setDisplaySize(w_shape, w_shape);
-    //pacman.setSize(w_shape, w_shape)
+    pacman.speed = 200;
 
     // Create animations for player
     this.anims.create({
@@ -87,15 +131,9 @@ var gamePlayState = new Phaser.Class({
       }),
       repeat: 0
     });
+  },
 
-    // Create Keyboard controls
-    upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-    downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-    leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-    rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-
-
-    //show background
+  showMap: function() {
 
     // Create walls
     walls = this.physics.add.staticGroup();
@@ -148,38 +186,12 @@ var gamePlayState = new Phaser.Class({
       (pacman, ball) => {
         //ball.disableBody(true, true);
         ball.destroy(true);
-        //pacman.score++;
+        pacman.score++;
+        scoreText.setText('Score: ' + pacman.score);
       }, null, this);
+  },
 
-    //Fin show background
-
-    enemy = this.physics.add.group({
-      key: "pacman_red",
-      setXY: {
-        x: -100,
-        y: -100
-      }
-    });
-    food = this.physics.add.group({
-      key: "pacman_green",
-      setXY: {
-        x: -100,
-        y: -100
-      }
-    });
-    neutral = this.physics.add.group({
-      key: "pacman",
-      setXY: {
-        x: -100,
-        y: -100
-      }
-    });
-
-    // Get camera
-    cam = this.cameras.main;
-    // Attach camera to player
-    cam.startFollow(pacman);
-
+  websocket: function() {
     //Websocket
     var data = {
       x: pacman.x,
@@ -211,39 +223,43 @@ var gamePlayState = new Phaser.Class({
             //si le score du pacman courant est superieur a celui de 'mon' pacman
             if (pac.score > pacman.score && !enemy.contains(pacmans[exist])) {
               //on lui change sont groupe (sauf si il appartient deja)
-              oldGroup = (neutral.contains(pacmans[exist])) ? neutral : food;
-              oldGroup.destroy(pacmans[exist]);
+              ((neutral.contains(pacmans[exist])) ? neutral : food).remove(pacmans[exist]);
+              pacmans[exist].setTexture("pacman_red");
               enemy.add(pacmans[exist]);
             } else if (pac.score < pacman.score && !food.contains(pacmans[exist])) {
-              oldGroup = (neutral.contains(pacmans[exist])) ? neutral : enemy;
-              oldGroup.destroy(pacmans[exist]);
+              ((neutral.contains(pacmans[exist])) ? neutral : enemy).remove(pacmans[exist]);
+              pacmans[exist].setTexture("pacman_green");
               food.add(pacmans[exist]);
-            } else if (!neutral.contains(pacmans[exist])) {
-              oldGroup = (enemy.contains(pacmans[exist])) ? enemy : food;
-              oldGroup.destroy(pacmans[exist]);
+            } else if (pac.score == pacman.score && !neutral.contains(pacmans[exist])) {
+              ((enemy.contains(pacmans[exist])) ? enemy : food).remove(pacmans[exist]);
+              pacmans[exist].setTexture("pacman");
               neutral.add(pacmans[exist]);
             }
 
             pacmans[exist].x = pac.x;
             pacmans[exist].y = pac.y;
+            pacmans[exist].score = pac.score;
           }
           //sinon on construit l'objet physics
           else {
-            var new_pacman = this.physics.add.sprite(w_shape, w_shape, "pacman");
+            var new_pacman = this.physics.add.sprite(w_shape, w_shape);
             new_pacman.id = pac.id;
-            new_pacman.x = random(cols) * 10;
-            new_pacman.y = random(rows) * 10;
-            new_pacman.score = 0;
+            new_pacman.x = pac.x;
+            new_pacman.y = pac.y;
+            new_pacman.score = pac.score;
 
-            if (0 < pacman.score) {
+            if (new_pacman.score > pacman.score) {
+              new_pacman.setTexture("pacman_red")
+              enemy.add(new_pacman);
+            } else if (new_pacman.score < pacman.score) {
+              new_pacman.setTexture("pacman_green")
               food.add(new_pacman);
-            } else if (0 == pacman.score) {
+            } else {
+              new_pacman.setTexture("pacman");
               neutral.add(new_pacman);
             }
 
-            //new_pacman.setDisplaySize(w_shape, w_shape);
-            //new_pacman.setSize(w_shape, w_shape)
-
+            new_pacman.setDisplaySize(w_shape, w_shape);
             pacmans.push(new_pacman);
           }
         }
@@ -268,19 +284,22 @@ var gamePlayState = new Phaser.Class({
   },
 
   update: function() {
+    _x = Math.floor(pacman.x);
+    _y = Math.floor(pacman.y);
     pacman.body.velocity.x = 0;
     pacman.body.velocity.y = 0;
+
     if (upKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed, 33);
+      this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
       pacman.anims.play("up", 30);
     } else if (downKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed, 33);
+      this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
       pacman.anims.play("down", 30);
     } else if (leftKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed, 33);
+      this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
       pacman.anims.play("left", 30);
     } else if (rightKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed, 33);
+      this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
       pacman.anims.play("right", 30);
     }
 
