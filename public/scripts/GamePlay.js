@@ -37,6 +37,12 @@ var gamePlayState = new Phaser.Class({
     this.load.image("d_wall", "./img/wall_down.png");
     this.load.image("l_wall", "./img/wall_left.png");
     this.load.image("r_wall", "./img/wall_right.png");
+
+    if (isMobile) {
+      this.load.image('vjoy_base', './img/base.png');
+      this.load.image('vjoy_body', './img/body.png');
+      this.load.image('vjoy_cap', './img/cap.png');
+    }
   },
 
   create: function() {
@@ -51,11 +57,30 @@ var gamePlayState = new Phaser.Class({
 
     this.initPacman();
 
-    // Create Keyboard controls
-    upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-    downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-    leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-    rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+    if (isMobile) {
+      plugin = this.plugins.get('VJoy');
+
+      var imageGroup = [];
+      var _xJoystick = 84;
+      var _yJoystick = 84;
+      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_cap'));
+      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_body'));
+      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_body'));
+      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_base'));
+
+      imageGroup.forEach((sprite) => {
+        sprite.setScrollFactor(0);
+      });
+
+      plugin.setSprite(imageGroup);
+      console.log(imageGroup[0]);
+    } else {
+      // Create Keyboard controls
+      upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+      downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+      leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+      rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+    }
 
     this.showMap();
 
@@ -289,18 +314,39 @@ var gamePlayState = new Phaser.Class({
     pacman.body.velocity.x = 0;
     pacman.body.velocity.y = 0;
 
-    if (upKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
-      pacman.anims.play("up", 30);
-    } else if (downKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
-      pacman.anims.play("down", 30);
-    } else if (leftKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
-      pacman.anims.play("left", 30);
-    } else if (rightKey.isDown) {
-      this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
-      pacman.anims.play("right", 30);
+    if (isMobile) {
+      var souris = this.input.mouse.manager.mousePointer.position;
+      plugin.setDirection(souris);
+      var cursors = plugin.getCursors();
+
+      if (cursors.left) {
+        this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
+        pacman.anims.play("left", 30);
+      } else if (cursors.right) {
+        this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
+        pacman.anims.play("right", 30);
+      } else if (cursors.up) {
+        this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
+        pacman.anims.play("up", 30);
+      } else if (cursors.down) {
+        this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
+        pacman.anims.play("down", 30);
+      }
+    } else {
+
+      if (upKey.isDown) {
+        this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
+        pacman.anims.play("up", 30);
+      } else if (downKey.isDown) {
+        this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
+        pacman.anims.play("down", 30);
+      } else if (leftKey.isDown) {
+        this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
+        pacman.anims.play("left", 30);
+      } else if (rightKey.isDown) {
+        this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
+        pacman.anims.play("right", 30);
+      }
     }
 
     var data = {

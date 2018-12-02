@@ -31,6 +31,8 @@ const rows = height / w;
 
 const w_shape = 20;
 
+const isMobile = 1; //
+
 function maze() {
   var l_map = initialize_map()
   l_map = generate_maze(l_map);
