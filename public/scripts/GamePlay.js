@@ -11,37 +11,37 @@ var gamePlayState = new Phaser.Class({
     // Preload images for this state
     this.load.spritesheet(
       "pacman",
-      "./img/pacman_sprite.png", {
+      "./assets/img/pacman/pacman_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
     this.load.spritesheet(
       "pacman_red",
-      "./img/pacman_red_sprite.png", {
+      "./assets/img/pacman/pacman_red_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
     this.load.spritesheet(
       "pacman_green",
-      "./img/pacman_green_sprite.png", {
+      "./assets/img/pacman/pacman_green_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
-    this.load.image("ball", "./img/ball.png");
+    this.load.image("ball", "./assets/img/map/ball.png");
 
     /* Walls */
-    this.load.image("u_wall", "./img/wall_up.png");
-    this.load.image("d_wall", "./img/wall_down.png");
-    this.load.image("l_wall", "./img/wall_left.png");
-    this.load.image("r_wall", "./img/wall_right.png");
+    this.load.image("u_wall", "./assets/img/map/wall_up.png");
+    this.load.image("d_wall", "./assets/img/map/wall_down.png");
+    this.load.image("l_wall", "./assets/img/map/wall_left.png");
+    this.load.image("r_wall", "./assets/img/map/wall_right.png");
 
     if (isMobile) {
-      this.load.image('vjoy_base', './img/base.png');
-      this.load.image('vjoy_body', './img/body.png');
-      this.load.image('vjoy_cap', './img/cap.png');
+      this.load.image('vjoy_base', './assets/img/joystick/base.png');
+      this.load.image('vjoy_body', './assets/img/joystick/body.png');
+      this.load.image('vjoy_cap', './assets/img/joystick/cap.png');
     }
   },
 
