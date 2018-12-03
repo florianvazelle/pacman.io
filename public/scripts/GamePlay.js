@@ -47,7 +47,7 @@ var gamePlayState = new Phaser.Class({
 
   create: function() {
     console.log("GamePlay");
-
+    console.log(this.sys.game.device.fullscreen)
     scoreText = this.add.text(16, 16, 'score: 0', {
       fontSize: '32px',
       fill: '#fff'
@@ -315,7 +315,7 @@ var gamePlayState = new Phaser.Class({
     pacman.body.velocity.y = 0;
 
     if (isMobile) {
-      var souris = this.input.mouse.manager.mousePointer.position;
+      var souris = this.input.mouse.manager.pointers[1].position;
       plugin.setDirection(souris);
       var cursors = plugin.getCursors();
 
