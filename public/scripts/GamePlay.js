@@ -47,7 +47,7 @@ var gamePlayState = new Phaser.Class({
 
   create: function() {
     console.log("GamePlay");
-    console.log(this.sys.game.device.fullscreen)
+
     scoreText = this.add.text(16, 16, 'score: 0', {
       fontSize: '32px',
       fill: '#fff'
@@ -61,19 +61,20 @@ var gamePlayState = new Phaser.Class({
       plugin = this.plugins.get('VJoy');
 
       var imageGroup = [];
-      var _xJoystick = 84;
-      var _yJoystick = 84;
-      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_cap'));
-      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_body'));
-      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_body'));
-      imageGroup.push(this.add.sprite(_xJoystick, _yJoystick, 'vjoy_base'));
-
-      imageGroup.forEach((sprite) => {
-        sprite.setScrollFactor(0);
-      });
-
+      imageGroup.push(this.add.sprite(0, 0, 'vjoy_cap'));
+      imageGroup.push(this.add.sprite(0, 0, 'vjoy_body'));
+      imageGroup.push(this.add.sprite(0, 0, 'vjoy_body'));
+      imageGroup.push(this.add.sprite(0, 0, 'vjoy_base'));
       plugin.setSprite(imageGroup);
-      console.log(imageGroup[0]);
+
+      this.input.on('pointerup', function(pointer) {
+        if (plugin.active) {
+          plugin.removeJoystick();
+        } else {
+          plugin.createJoystick(pointer.position);
+        }
+      }, this);
+
     } else {
       // Create Keyboard controls
       upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
@@ -315,7 +316,7 @@ var gamePlayState = new Phaser.Class({
     pacman.body.velocity.y = 0;
 
     if (isMobile) {
-      var souris = this.input.mouse.manager.pointers[1].position;
+      var souris = this.input.manager.pointers[1].position;
       plugin.setDirection(souris);
       var cursors = plugin.getCursors();
 
