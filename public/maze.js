@@ -29,9 +29,9 @@ const w = 1;
 const cols = width / w;
 const rows = height / w;
 
-const w_shape = 20;
+const w_shape = 30;
 
-const isMobile = (window.innerWidth < 950)
+const isMobile = 1; //(window.innerWidth < 700)
 
 function maze() {
   var l_map = initialize_map()

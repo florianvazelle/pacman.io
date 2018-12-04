@@ -55,6 +55,7 @@ io.sockets.on('connection', connection);
  * Fonction appele lors d'une nouvelle
  * connection au serveur
  *
+ * @method connection
  * @param {Object} socket -
  */
 

@@ -67,11 +67,14 @@ var gamePlayState = new Phaser.Class({
       imageGroup.push(this.add.sprite(0, 0, 'vjoy_base'));
       plugin.setSprite(imageGroup);
 
+      this.input.on('pointerdown', function(pointer) {
+        if (!plugin.active) {
+          plugin.createJoystick(pointer.position);
+        }
+      }, this);
       this.input.on('pointerup', function(pointer) {
         if (plugin.active) {
           plugin.removeJoystick();
-        } else {
-          plugin.createJoystick(pointer.position);
         }
       }, this);
 
@@ -111,52 +114,16 @@ var gamePlayState = new Phaser.Class({
     cam = this.cameras.main;
     // Attach camera to player
     cam.startFollow(pacman);
+    //cam.setSize(50, 50);
 
     this.websocket();
   },
 
   initPacman: function() {
     // Create player
-    pacman = this.physics.add.sprite(w_shape, w_shape, "pacman");
-    pacman.setDisplaySize(w_shape, w_shape);
-    pacman.x = random(cols) * w_shape;
-    pacman.y = random(rows) * w_shape;
-    pacman.score = 0;
-    pacman.speed = 200;
-
-    // Create animations for player
-    this.anims.create({
-      key: "left",
-      frames: this.anims.generateFrameNumbers("pacman", {
-        start: 2,
-        end: 3
-      }),
-      repeat: 0
-    });
-    this.anims.create({
-      key: "down",
-      frames: this.anims.generateFrameNumbers("pacman", {
-        start: 6,
-        end: 7
-      }),
-      repeat: 0
-    });
-    this.anims.create({
-      key: "right",
-      frames: this.anims.generateFrameNumbers("pacman", {
-        start: 0,
-        end: 1
-      }),
-      repeat: 0
-    });
-    this.anims.create({
-      key: "up",
-      frames: this.anims.generateFrameNumbers("pacman", {
-        start: 4,
-        end: 5
-      }),
-      repeat: 0
-    });
+    let x = random(cols) * w_shape;
+    let y = random(rows) * w_shape;
+    pacman = new MyPacman(this, x, y);
   },
 
   showMap: function() {
@@ -243,49 +210,16 @@ var gamePlayState = new Phaser.Class({
           });
 
           //si exist n'est pas egale a -1 cela veut dire que le pacmans
-          //existe deja dans le tableau donc pas la peine de le Creer
-          //on met juste a jour son groupe et ses coordonnees
+          //existe deja dans le tableau donc pas la peine de le Cceer
           if (exist != -1) {
-            //si le score du pacman courant est superieur a celui de 'mon' pacman
-            if (pac.score > pacman.score && !enemy.contains(pacmans[exist])) {
-              //on lui change sont groupe (sauf si il appartient deja)
-              ((neutral.contains(pacmans[exist])) ? neutral : food).remove(pacmans[exist]);
-              pacmans[exist].setTexture("pacman_red");
-              enemy.add(pacmans[exist]);
-            } else if (pac.score < pacman.score && !food.contains(pacmans[exist])) {
-              ((neutral.contains(pacmans[exist])) ? neutral : enemy).remove(pacmans[exist]);
-              pacmans[exist].setTexture("pacman_green");
-              food.add(pacmans[exist]);
-            } else if (pac.score == pacman.score && !neutral.contains(pacmans[exist])) {
-              ((enemy.contains(pacmans[exist])) ? enemy : food).remove(pacmans[exist]);
-              pacmans[exist].setTexture("pacman");
-              neutral.add(pacmans[exist]);
-            }
-
-            pacmans[exist].x = pac.x;
-            pacmans[exist].y = pac.y;
-            pacmans[exist].score = pac.score;
+            //on met juste a jour son groupe et ses coordonnees
+            pacmans[exist].updateAttr(pac.x, pac.y, pac.score);
+            pacmans[exist].updateGroup(enemy, food, neutral, pacman.score);
           }
           //sinon on construit l'objet physics
           else {
-            var new_pacman = this.physics.add.sprite(w_shape, w_shape);
-            new_pacman.id = pac.id;
-            new_pacman.x = pac.x;
-            new_pacman.y = pac.y;
-            new_pacman.score = pac.score;
-
-            if (new_pacman.score > pacman.score) {
-              new_pacman.setTexture("pacman_red")
-              enemy.add(new_pacman);
-            } else if (new_pacman.score < pacman.score) {
-              new_pacman.setTexture("pacman_green")
-              food.add(new_pacman);
-            } else {
-              new_pacman.setTexture("pacman");
-              neutral.add(new_pacman);
-            }
-
-            new_pacman.setDisplaySize(w_shape, w_shape);
+            var new_pacman = new s_Pacman(this, pac.id, pac.x, pac.y);
+            new_pacman.updateGroup(enemy, food, neutral, pacman.score);
             pacmans.push(new_pacman);
           }
         }
@@ -320,34 +254,9 @@ var gamePlayState = new Phaser.Class({
       plugin.setDirection(souris);
       var cursors = plugin.getCursors();
 
-      if (cursors.left) {
-        this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
-        pacman.anims.play("left", 30);
-      } else if (cursors.right) {
-        this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
-        pacman.anims.play("right", 30);
-      } else if (cursors.up) {
-        this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
-        pacman.anims.play("up", 30);
-      } else if (cursors.down) {
-        this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
-        pacman.anims.play("down", 30);
-      }
+      pacman.move(cursors.up, cursors.down, cursors.left, cursors.right);
     } else {
-
-      if (upKey.isDown) {
-        this.physics.moveTo(pacman, pacman.x, pacman.y - w_shape, pacman.speed);
-        pacman.anims.play("up", 30);
-      } else if (downKey.isDown) {
-        this.physics.moveTo(pacman, pacman.x, pacman.y + w_shape, pacman.speed);
-        pacman.anims.play("down", 30);
-      } else if (leftKey.isDown) {
-        this.physics.moveTo(pacman, pacman.x - w_shape, pacman.y, pacman.speed);
-        pacman.anims.play("left", 30);
-      } else if (rightKey.isDown) {
-        this.physics.moveTo(pacman, pacman.x + w_shape, pacman.y, pacman.speed);
-        pacman.anims.play("right", 30);
-      }
+      pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown);
     }
 
     var data = {

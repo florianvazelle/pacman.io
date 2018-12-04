@@ -27,6 +27,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * First function call
+   * @method init
    */
   init() {
     console.log('Plugin is alive');
@@ -34,6 +35,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * To get the cursors attribute
+   * @method getCursors
    * @return {Object}
    */
   getCursors() {
@@ -42,6 +44,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * For set sprite
+   * @method setSprite
    * @param {array} - Array of multiple sprite
    */
   setSprite(imageGroup) {
@@ -51,6 +54,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * To define cursors
+   * @method setDirection
    * @param {Object} - Coordinates of pointer (A Pointer object encapsulates both mouse and touch input within Phaser.)
    */
   setDirection(mouse) {
@@ -96,6 +100,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * For create the Joystick
+   * @method createJoystick
    * @param {Object} - Coordinates of pointer.
    */
   createJoystick(mouse) {
@@ -118,6 +123,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
 
   /**
    * For remove the Joystick
+   * @method removeJoystick
    */
   removeJoystick() {
     this.active = false;
