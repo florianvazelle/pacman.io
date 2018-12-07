@@ -10,12 +10,10 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 
     <!-- my file -->
-    <script type="text/javascript" src="./toolbox.js"></script>
-    <script type="text/javascript" src="./maze.js"></script>
     <script type="text/javascript" src="./scripts/Pacman.js"></script>
 
     <!-- my plugin -->
-    <script type="text/javascript" src="./scripts/VJoy.js"></script>
+    <script type="text/javascript" src="./scripts/plugins/VJoy.js"></script>
 
     <!--  Include game files in the order that will be referenced  -->
     <script type="text/javascript" src="./scripts/GlobalVariables.js"></script>
@@ -41,10 +39,11 @@
         width: 640,//window.innerWidth,
         height: 480,//window.innerHeight,
         debug: true,
+        backgroundColor: '#2d2d2d',
         physics: {
         default: 'arcade',
           arcade: {
-            debug: false
+            debug: true
           }
         },
         plugins: {

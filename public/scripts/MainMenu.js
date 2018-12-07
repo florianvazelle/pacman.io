@@ -8,7 +8,7 @@ var mainMenuState = new Phaser.Class({
   },
 
   preload: function() {
-    this.load.image("startBtn", "./assets/img/menu/startBtn.png");
+    this.load.image("startBtn", "./assets/sprites/menu/startBtn.png");
   },
 
   create: function() {

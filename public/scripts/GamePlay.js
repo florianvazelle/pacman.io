@@ -11,53 +11,65 @@ var gamePlayState = new Phaser.Class({
     // Preload images for this state
     this.load.spritesheet(
       "pacman",
-      "./assets/img/pacman/pacman_sprite.png", {
+      "./assets/sprites/pacman/pacman_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
     this.load.spritesheet(
       "pacman_red",
-      "./assets/img/pacman/pacman_red_sprite.png", {
+      "./assets/sprites/pacman/pacman_red_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
     this.load.spritesheet(
       "pacman_green",
-      "./assets/img/pacman/pacman_green_sprite.png", {
+      "./assets/sprites/pacman/pacman_green_sprite.png", {
         frameWidth: 100,
         frameHeight: 100
       });
 
-    this.load.image("ball", "./assets/img/map/ball.png");
+    this.load.image("ball", "./assets/sprites/map/ball.png");
+    this.load.tilemapTiledJSON('map', './assets/tilemaps/maps/grid.json');
+    this.load.image("tiles", "./assets/tilemaps/tiles/pacman-tiles-100x100.png");
 
-    /* Walls */
-    this.load.image("u_wall", "./assets/img/map/wall_up.png");
-    this.load.image("d_wall", "./assets/img/map/wall_down.png");
-    this.load.image("l_wall", "./assets/img/map/wall_left.png");
-    this.load.image("r_wall", "./assets/img/map/wall_right.png");
-
-    if (isMobile) {
-      this.load.image('vjoy_base', './assets/img/joystick/base.png');
-      this.load.image('vjoy_body', './assets/img/joystick/body.png');
-      this.load.image('vjoy_cap', './assets/img/joystick/cap.png');
+    if (myGame.isMobile) {
+      this.load.image('vjoy_base', './assets/sprites/joystick/base.png');
+      this.load.image('vjoy_body', './assets/sprites/joystick/body.png');
+      this.load.image('vjoy_cap', './assets/sprites/joystick/cap.png');
     }
   },
 
   create: function() {
     console.log("GamePlay");
 
-    scoreText = this.add.text(16, 16, 'score: 0', {
+    let x = random(myGame.cols()) * myGame.w_shape;
+    let y = random(myGame.rows()) * myGame.w_shape;
+    myGame.pacman = new MyPacman(this, x, y);
+
+    /* Map */
+    myGame.map = this.make.tilemap({
+      key: 'map'
+    });
+    var tileset = myGame.map.addTilesetImage("tiles");
+    var wallLayer = myGame.map.createStaticLayer("Wall Layer", tileset);
+    var ballLayer = myGame.map.createDynamicLayer("Ball Layer", tileset, 0, 0);
+    wallLayer.setScale(myGame.w_shape / 100);
+    ballLayer.setScale(myGame.w_shape / 100);
+    myGame.map.setCollisionBetween(2, 5, true, false, wallLayer);
+
+    // Add collider between pacman and walls
+    this.physics.add.collider(myGame.pacman, wallLayer);
+
+    /* Score */
+    scoreText = this.add.text(16, 16, 'Score: 0', {
       fontSize: '32px',
       fill: '#fff'
     });
-
     scoreText.setScrollFactor(0);
 
-    this.initPacman();
-
-    if (isMobile) {
+    if (myGame.isMobile) {
       plugin = this.plugins.get('VJoy');
 
       var imageGroup = [];
@@ -86,8 +98,6 @@ var gamePlayState = new Phaser.Class({
       rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
     }
 
-    this.showMap();
-
     enemy = this.physics.add.group({
       key: "pacman_red",
       setXY: {
@@ -112,84 +122,19 @@ var gamePlayState = new Phaser.Class({
 
     // Get camera
     cam = this.cameras.main;
+    this.cameras.main.setBounds(0, 0, myGame.map.widthInPixels, myGame.map.heightInPixels);
     // Attach camera to player
-    cam.startFollow(pacman);
-    //cam.setSize(50, 50);
+    cam.startFollow(myGame.pacman);
 
     this.websocket();
-  },
-
-  initPacman: function() {
-    // Create player
-    let x = random(cols) * w_shape;
-    let y = random(rows) * w_shape;
-    pacman = new MyPacman(this, x, y);
-  },
-
-  showMap: function() {
-
-    // Create walls
-    walls = this.physics.add.staticGroup();
-    // Create balls
-    balls = this.physics.add.staticGroup();
-
-    map.forEach((cell) => {
-      var x = calc(cell.x) * w_shape;
-      var y = calc(cell.y) * w_shape;
-      myCreate(x, y, balls, 'ball');
-      cell.walls.forEach((wall, idx) => {
-        if (!wall) {
-          if (idx == 0) myCreate(x + w_shape, y, walls, 'r_wall');
-          if (idx == 1) myCreate(x - w_shape, y, walls, 'l_wall');
-          if (idx == 2) myCreate(x, y + w_shape, walls, 'd_wall');
-          if (idx == 3) myCreate(x, y - w_shape, walls, 'u_wall');
-        } else {
-          if (idx == 0) {
-            myCreate(x + w_shape, y, balls, 'ball');
-            myCreate(x + w_shape, y + w_shape, walls, 'd_wall');
-            myCreate(x + w_shape, y - w_shape, walls, 'u_wall');
-          }
-          if (idx == 1) {
-            myCreate(x - w_shape, y, balls, 'ball');
-            myCreate(x - w_shape, y + w_shape, walls, 'd_wall');
-            myCreate(x - w_shape, y - w_shape, walls, 'u_wall');
-          }
-          if (idx == 2) {
-            myCreate(x, y + w_shape, balls, 'ball');
-            myCreate(x + w_shape, y + w_shape, walls, 'r_wall');
-            myCreate(x - w_shape, y + w_shape, walls, 'l_wall');
-          }
-          if (idx == 3) {
-            myCreate(x, y - w_shape, balls, 'ball');
-            myCreate(x + w_shape, y - w_shape, walls, 'r_wall');
-            myCreate(x - w_shape, y - w_shape, walls, 'l_wall');
-          }
-        }
-      });
-    });
-
-    balls.refresh();
-    walls.refresh();
-
-    // Add collider between player and walls
-    this.physics.add.collider(pacman, walls);
-
-    // Add overlap between player and balls
-    this.physics.add.overlap(pacman, balls,
-      (pacman, ball) => {
-        //ball.disableBody(true, true);
-        ball.destroy(true);
-        pacman.score++;
-        scoreText.setText('Score: ' + pacman.score);
-      }, null, this);
   },
 
   websocket: function() {
     //Websocket
     var data = {
-      x: pacman.x,
-      y: pacman.y,
-      score: pacman.score
+      x: myGame.pacman.x,
+      y: myGame.pacman.y,
+      score: myGame.pacman.score
     };
     socket.emit('start', data);
 
@@ -203,7 +148,7 @@ var gamePlayState = new Phaser.Class({
           //si le pacman existe deja dans le tableau pacmans on le met juste a jour
           //pour cela on parcours la table pacmans
           var exist = -1;
-          pacmans.forEach((pcm, idx) => {
+          myGame.pacmans.forEach((pcm, idx) => {
             if (pac.id == pcm.id) {
               exist = idx;
             }
@@ -213,21 +158,21 @@ var gamePlayState = new Phaser.Class({
           //existe deja dans le tableau donc pas la peine de le Cceer
           if (exist != -1) {
             //on met juste a jour son groupe et ses coordonnees
-            pacmans[exist].updateAttr(pac.x, pac.y, pac.score);
-            pacmans[exist].updateGroup(enemy, food, neutral, pacman.score);
+            myGame.pacmans[exist].updateAttr(pac.x, pac.y, pac.score);
+            myGame.pacmans[exist].updateGroup(enemy, food, neutral, myGame.pacman.score);
           }
           //sinon on construit l'objet physics
           else {
             var new_pacman = new s_Pacman(this, pac.id, pac.x, pac.y);
-            new_pacman.updateGroup(enemy, food, neutral, pacman.score);
-            pacmans.push(new_pacman);
+            new_pacman.updateGroup(enemy, food, neutral, myGame.pacman.score);
+            myGame.pacmans.push(new_pacman);
           }
         }
       });
       //le troisieme cas est celui ou un joueur c'est deconnecte
       //il faut donc supprimer sa physics
-      if (data.length < pacmans.length + 1) {
-        pacmans.forEach((pcm, idx) => {
+      if (data.length < myGame.pacmans.length + 1) {
+        myGame.pacmans.forEach((pcm, idx) => {
           var exist = false;
           data.forEach((pac) => {
             if (pac.id == pcm.id) {
@@ -235,8 +180,8 @@ var gamePlayState = new Phaser.Class({
             }
           });
           if (!exist) {
-            pacmans[idx].destroy(true);
-            pacmans.splice(idx, 1);
+            myGame.pacmans[idx].destroy(true);
+            myGame.pacmans.splice(idx, 1);
           }
         });
       }
@@ -244,25 +189,35 @@ var gamePlayState = new Phaser.Class({
   },
 
   update: function() {
-    _x = Math.floor(pacman.x);
-    _y = Math.floor(pacman.y);
-    pacman.body.velocity.x = 0;
-    pacman.body.velocity.y = 0;
+    _x = Math.floor(myGame.pacman.x);
+    _y = Math.floor(myGame.pacman.y);
+    myGame.pacman.body.setVelocity(0);
 
-    if (isMobile) {
+    var tile = myGame.map.getTileAtWorldXY(_x, _y);
+    var pointerTileX = myGame.map.worldToTileX(_x);
+    var pointerTileY = myGame.map.worldToTileY(_y);
+    if (tile != null) {
+      if (tile.index == 1) {
+        myGame.map.putTileAt(0, pointerTileX, pointerTileY);
+        myGame.pacman.score += 1;
+        scoreText.setText('Score: ' + myGame.pacman.score);
+      }
+    }
+
+    if (myGame.isMobile) {
       var souris = this.input.manager.pointers[1].position;
       plugin.setDirection(souris);
       var cursors = plugin.getCursors();
 
-      pacman.move(cursors.up, cursors.down, cursors.left, cursors.right);
+      myGame.pacman.move(cursors.up, cursors.down, cursors.left, cursors.right);
     } else {
-      pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown);
+      myGame.pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown);
     }
 
     var data = {
-      x: pacman.x,
-      y: pacman.y,
-      score: pacman.score
+      x: myGame.pacman.x,
+      y: myGame.pacman.y,
+      score: myGame.pacman.score
     };
     socket.emit('update', data);
   },
@@ -271,14 +226,6 @@ var gamePlayState = new Phaser.Class({
 // Add scene to list of scenes
 myGame.scenes.push(gamePlayState);
 
-/**
- *
- *
- * @method calc
- * @param {number} - Le n-ieme index
- * @return {number} - Le chiffre correspondante a la suite pour le n
- */
-
-function calc(n) {
-  return 3 * n + 1;
+function random(n) {
+  return Math.floor((Math.random() * n) + 1);
 }

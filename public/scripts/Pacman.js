@@ -4,7 +4,7 @@ class Pacman extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    this.setDisplaySize(w_shape, w_shape);
+    this.setDisplaySize(myGame.w_shape, myGame.w_shape);
     this.score = 0;
   }
 }
@@ -37,16 +37,16 @@ class MyPacman extends Pacman {
 
   move(up, down, left, right) {
     if (up) {
-      this.scene.physics.moveTo(this, this.x, this.y - w_shape, this.speed);
+      this.scene.physics.moveTo(this, this.x, this.y - myGame.w_shape, this.speed);
       this.anims.play("up", 30);
     } else if (down) {
-      this.scene.physics.moveTo(this, this.x, this.y + w_shape, this.speed);
+      this.scene.physics.moveTo(this, this.x, this.y + myGame.w_shape, this.speed);
       this.anims.play("down", 30);
     } else if (left) {
-      this.scene.physics.moveTo(this, this.x - w_shape, this.y, this.speed);
+      this.scene.physics.moveTo(this, this.x - myGame.w_shape, this.y, this.speed);
       this.anims.play("left", 30);
     } else if (right) {
-      this.scene.physics.moveTo(this, this.x + w_shape, this.y, this.speed);
+      this.scene.physics.moveTo(this, this.x + myGame.w_shape, this.y, this.speed);
       this.anims.play("right", 30);
     }
   }

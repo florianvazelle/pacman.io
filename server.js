@@ -24,7 +24,7 @@ class Pacman {
 const http = require('http');
 const serve = require('koa-static');
 
-const hostname = '127.0.0.1';
+const hostname = '192.168.1.27';//'127.0.0.1';
 const port = 55555;
 
 const Koa = require('koa');
@@ -40,6 +40,8 @@ function listen() {
   var port = server.address().port;
   console.log("App listening at http://" + host + ":" + port);
 }
+
+create_map();
 
 var io = require('socket.io').listen(server);
 
@@ -90,4 +92,10 @@ function connection(socket) {
       }
     });
   });
+}
+
+function create_map() {
+  const fs = require("fs");
+  var maze_json = require("./lib/getJsonMaze");
+  fs.writeFileSync("./public/assets/tilemaps/maps/grid.json", JSON.stringify(maze_json), "UTF-8");
 }
