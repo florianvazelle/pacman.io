@@ -8,7 +8,6 @@ var gamePlayState = new Phaser.Class({
   },
 
   preload: function() {
-    // Preload images for this state
     this.load.spritesheet(
       "pacman",
       "./assets/sprites/pacman/pacman_sprite.png", {
@@ -37,6 +36,9 @@ var gamePlayState = new Phaser.Class({
     this.load.image("ball", "./assets/sprites/map/ball.png");
     this.load.json("master", './assets/tilemaps/maps/chunks/master.json');
     this.load.image("tiles", "./assets/tilemaps/tiles/pacman-tiles-32x32.png");
+
+    var os = this.sys.game.device.os;
+    myGame.isMobile = (os.android || os.iPhone || os.windowsPhone);
 
     if (myGame.isMobile) {
       this.load.image('vjoy_base', './assets/sprites/joystick/base.png');
@@ -227,13 +229,16 @@ var gamePlayState = new Phaser.Class({
       var cursors = plugin.getCursors();
 
       myGame.pacman.move(cursors.up, cursors.down, cursors.left, cursors.right);
+      if (cursors.up || cursors.down || cursors.left || cursors.right) {
+        this.updateEnvironment();
+      }
     } else {
       myGame.pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown);
+      if (upKey.isDown || downKey.isDown || leftKey.isDow || rightKey.isDown) {
+        this.updateEnvironment();
+      }
     }
 
-    if (upKey.isDown || downKey.isDown || leftKey.isDow || rightKey.isDown) {
-      this.updateEnvironment();
-    }
 
     var data = {
       x: myGame.pacman.x,

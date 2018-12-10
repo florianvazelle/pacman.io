@@ -85,6 +85,7 @@ class VJoy extends Phaser.Plugins.BasePlugin {
       deltaY = Math.sin(angle) * maxDistanceInPixels;
     }
 
+    if (deltaY > 0 && deltaX < 0) deltaY = 0; //Petit ajustement
     this.cursors = {
       up: (deltaY < 0),
       down: (deltaY > 0),

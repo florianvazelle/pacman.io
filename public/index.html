@@ -21,11 +21,11 @@
     <script type="text/javascript" src="./scripts/MainMenu.js"></script>
     <script type="text/javascript" src="./scripts/GamePlay.js"></script>
 
-    <!-- <style>
+     <style>
       * { margin:0; padding:0; }
       html, body { width:100%; height:100%; }
       canvas { display:block; }
-    </style> -->
+    </style>
   </head>
 
   <body>
@@ -36,8 +36,8 @@
       //On page load, create game config
       var config = {
         type: Phaser.AUTO,
-        width: 640,//window.innerWidth,
-        height: 480,//window.innerHeight,
+        width: window.innerWidth,
+        height: window.innerHeight,
         debug: true,
         backgroundColor: '#2d2d2d',
         physics: {
