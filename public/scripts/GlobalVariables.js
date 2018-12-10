@@ -15,7 +15,7 @@ var myGame = {
     return this.height / this.w
   },
 
-  w_shape: 30,
+  w_shape: 32,
 
   isMobile: 0, //(window.innerWidth < 700)
 

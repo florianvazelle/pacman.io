@@ -31,14 +31,12 @@ var gamePlayState = new Phaser.Class({
       });
 
     this.cache.tilemap.events.on('add', function(cache, key) {
-      console.log("\tJe vais afficher le " + key)
       this.displayChunk(key);
-      console.log("\tfin de l'affichage du " + key)
     }, this);
 
     this.load.image("ball", "./assets/sprites/map/ball.png");
     this.load.json("master", './assets/tilemaps/maps/chunks/master.json');
-    this.load.image("tiles", "./assets/tilemaps/tiles/pacman-tiles-100x100.png");
+    this.load.image("tiles", "./assets/tilemaps/tiles/pacman-tiles-32x32.png");
 
     if (myGame.isMobile) {
       this.load.image('vjoy_base', './assets/sprites/joystick/base.png');
@@ -59,6 +57,7 @@ var gamePlayState = new Phaser.Class({
     this.maps = {};
     this.listCollider = {};
     this.displayedChunks = [];
+
     var masterData = this.cache.json.get('master');
     this.chunkWidth = masterData.chunkWidth;
     this.chunkHeight = masterData.chunkHeight;
@@ -72,6 +71,7 @@ var gamePlayState = new Phaser.Class({
       fill: '#fff'
     });
     scoreText.setScrollFactor(0);
+    scoreText.setDepth(5);
 
     /* Mobile configuration */
     if (myGame.isMobile) {
@@ -135,6 +135,8 @@ var gamePlayState = new Phaser.Class({
     cam.startFollow(myGame.pacman);
 
     this.websocket();
+
+    this.updateEnvironment();
   },
 
   websocket: function() {
@@ -197,23 +199,28 @@ var gamePlayState = new Phaser.Class({
   },
 
   update: function() {
-    this.updateEnvironment();
+    //this.updateEnvironment();
     _x = Math.floor(myGame.pacman.x);
     _y = Math.floor(myGame.pacman.y);
     myGame.pacman.body.setVelocity(0);
 
-    /*
-        var tile = myGame.map.getTileAtWorldXY(_x, _y);
-        var pointerTileX = myGame.map.worldToTileX(_x);
-        var pointerTileY = myGame.map.worldToTileY(_y);
-        if (tile != null) {
-          if (tile.index == 1) {
-            myGame.map.putTileAt(0, pointerTileX, pointerTileY);
-            myGame.pacman.score += 1;
-            scoreText.setText('Score: ' + myGame.pacman.score);
-          }
+    var chunkID = this.computeChunkID(_x, _y);
+    if (this.maps.hasOwnProperty(chunkID)) {
+      var map = this.maps[chunkID];
+      var tile = map.getTileAtWorldXY(_x, _y);
+      var pointerTileX = map.worldToTileX(_x);
+      var pointerTileY = map.worldToTileY(_y);
+      if (tile != null) {
+        if (tile.index == 1) {
+          //  console.log(this.maps[chunkID])
+          this.maps[chunkID].putTileAt(0, pointerTileX, pointerTileY);
+          //this.maps[chunkID].removeTileAt(pointerTileX, pointerTileY);
+          myGame.pacman.score += 1;
+          scoreText.setText('Score: ' + myGame.pacman.score);
         }
-    */
+      }
+    }
+
     if (myGame.isMobile) {
       var souris = this.input.manager.pointers[1].position;
       plugin.setDirection(souris);
@@ -252,15 +259,15 @@ var gamePlayState = new Phaser.Class({
 
   updateEnvironment: function() {
     var chunkID = this.computeChunkID(myGame.pacman.x, myGame.pacman.y);
-    var chunks = this.listAdjacentChunks(chunkID); // List the id's of the chunks surrounding the one we are in
-    var newChunks = this.findDiffArrayElements(chunks, this.displayedChunks); // Lists the surrounding chunks that are not displayed yet (and have to be)
-    var oldChunks = this.findDiffArrayElements(this.displayedChunks, chunks); // Lists the surrounding chunks that are still displayed (and shouldn't anymore)
+    var chunks = this.listAdjacentChunks(chunkID);
+    var newChunks = this.findDiffArrayElements(chunks, this.displayedChunks);
+    var oldChunks = this.findDiffArrayElements(this.displayedChunks, chunks);
 
     newChunks.forEach(function(nb) {
       console.log('loading chunk' + nb);
       this.load.tilemapTiledJSON('chunk' + nb, './assets/tilemaps/maps/chunks/chunk' + nb + '.json');
     }, this);
-    if (newChunks.length > 0) this.load.start(); // Needed to trigger loads from outside of preload()
+    if (newChunks.length > 0) this.load.start();
 
     oldChunks.forEach(function(nb) {
       console.log('destroying chunk' + nb);
@@ -275,20 +282,16 @@ var gamePlayState = new Phaser.Class({
 
     var tileset = map.addTilesetImage("tilesheet", "tiles");
 
-    // We need to compute the position of the chunk in the world
-    var chunkID = parseInt(key.match(/\d+/)[0]); // Extracts the chunk number from file name
+    var chunkID = parseInt(key.match(/\d+/)[0]);
     var chunkX = (chunkID % this.nbChunksHorizontal) * this.chunkWidth;
     var chunkY = Math.floor(chunkID / this.nbChunksHorizontal) * this.chunkHeight;
 
     var wallLayer = map.createStaticLayer("Wall Layer", tileset, chunkX * myGame.w_shape, chunkY * myGame.w_shape);
-    var ballLayer = map.createDynamicLayer("Ball Layer", tileset, chunkX * myGame.w_shape, chunkY * myGame.w_shape);
-
-    wallLayer.setScale(myGame.w_shape / 100);
-    ballLayer.setScale(myGame.w_shape / 100);
-
-    map.setCollisionBetween(2, 5, true, false, wallLayer);
+    map.setCollisionBetween(2, 5, true, true, wallLayer);
     var collider = this.physics.add.collider(myGame.pacman, wallLayer);
     this.listCollider[chunkID] = collider;
+
+    var ballLayer = map.createDynamicLayer("Ball Layer", tileset, chunkX * myGame.w_shape, chunkY * myGame.w_shape);
 
     this.maps[chunkID] = map;
     this.displayedChunks.push(chunkID);
