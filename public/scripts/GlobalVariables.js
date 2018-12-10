@@ -3,8 +3,8 @@ var myGame = {
   //Define our game states
   scenes: [],
 
-  width: 6, //640;
-  height: 4, //480;
+  width: 60, //640;
+  height: 40, //480;
   w: 1,
 
   cols: function() {
@@ -21,9 +21,6 @@ var myGame = {
 
   pacmans: [],
   pacman: null,
-
-  map: null,
-  ballLayer: null,
 
   // Define common framerate to be referenced in animations
   frameRate: 10

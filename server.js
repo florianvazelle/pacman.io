@@ -24,7 +24,7 @@ class Pacman {
 const http = require('http');
 const serve = require('koa-static');
 
-const hostname = '192.168.1.27';//'127.0.0.1';
+const hostname = '192.168.1.27'; //'127.0.0.1';
 const port = 55555;
 
 const Koa = require('koa');
@@ -94,8 +94,16 @@ function connection(socket) {
   });
 }
 
-function create_map() {
-  const fs = require("fs");
-  var maze_json = require("./lib/getJsonMaze");
-  fs.writeFileSync("./public/assets/tilemaps/maps/grid.json", JSON.stringify(maze_json), "UTF-8");
+function resolveAfter2Seconds() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      require('./lib/splitter/splitmap')
+      resolve('resolved');
+    }, 2000);
+  });
+}
+
+async function create_map() {
+  require('./lib/creator/createmaze');
+  await resolveAfter2Seconds()
 }

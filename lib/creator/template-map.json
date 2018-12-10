@@ -1,0 +1,44 @@
+{
+  "height": 0,
+  "layers": [{
+    "data": [],
+    "height": 0,
+    "name": "Wall Layer",
+    "opacity": 1,
+    "type": "tilelayer",
+    "visible": true,
+    "width": 0,
+    "x": 0,
+    "y": 0
+  }, {
+    "data": [],
+    "height": 0,
+    "name": "Ball Layer",
+    "opacity": 1,
+    "type": "tilelayer",
+    "visible": true,
+    "width": 0,
+    "x": 0,
+    "y": 0
+  }],
+  "nextobjectid": 1,
+  "orientation": "orthogonal",
+  "properties": {},
+  "renderorder": "right-down",
+  "tileheight": 100,
+  "tilesets": [{
+    "firstgid": 1,
+    "image": "../tile/pacman_map.png",
+    "imageheight": 400,
+    "imagewidth": 300,
+    "margin": 0,
+    "name": "tilesheet",
+    "properties": {},
+    "spacing": 0,
+    "tileheight": 100,
+    "tilewidth": 100
+  }],
+  "tilewidth": 100,
+  "version": 1,
+  "width": 0
+}
