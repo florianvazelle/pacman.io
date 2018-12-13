@@ -4,7 +4,7 @@
  * Nodejs
 
 ### Installation
-Pour installer les dependances du projet :
+Pour installer les dépendances du projet :
 
     npm install
 
