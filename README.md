@@ -1,4 +1,4 @@
-#pacman.io
+# pacman.io
 
 ### Prérequis
  * Nodejs
