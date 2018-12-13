@@ -53,7 +53,7 @@ var gamePlayState = new Phaser.Class({
     /* Create our pacman */
     let x = random(myGame.cols()) * myGame.w_shape;
     let y = random(myGame.rows()) * myGame.w_shape;
-    myGame.pacman = new MyPacman(this, x, y);
+    myGame.pacman = new MyPacman(this, x, y, myGame.name);
 
     /* Variable for chunks */
     this.maps = {};
@@ -70,7 +70,8 @@ var gamePlayState = new Phaser.Class({
     /* Score */
     scoreText = this.add.text(16, 16, 'Score: 0', {
       fontSize: '32px',
-      fill: '#fff'
+      fill: '#fff',
+      backgroundColor: '#696969'
     });
     scoreText.setScrollFactor(0);
     scoreText.setDepth(5);
@@ -146,7 +147,8 @@ var gamePlayState = new Phaser.Class({
     var data = {
       x: myGame.pacman.x,
       y: myGame.pacman.y,
-      score: myGame.pacman.score
+      score: myGame.pacman.score,
+      name: myGame.pacman.name
     };
     socket.emit('start', data);
 
@@ -175,7 +177,7 @@ var gamePlayState = new Phaser.Class({
           }
           //sinon on construit l'objet physics
           else {
-            var new_pacman = new s_Pacman(this, pac.id, pac.x, pac.y);
+            var new_pacman = new s_Pacman(this, pac.id, pac.x, pac.y, pac.name);
             new_pacman.updateGroup(enemy, food, neutral, myGame.pacman.score);
             myGame.pacmans.push(new_pacman);
           }
@@ -197,7 +199,36 @@ var gamePlayState = new Phaser.Class({
           }
         });
       }
+      this.updateHightScore();
     });
+  },
+
+  updateHightScore: function() {
+    var tmp_pacmans = myGame.pacmans.concat(myGame.pacman);
+    tmp_pacmans.sort((a, b) => {
+      if (a.score < b.score) {
+        return 1;
+      }
+      if (a.score > b.score) {
+        return -1;
+      }
+      return 0;
+    });
+
+    var new_scoreText = '';
+    var inTop = false;
+    tmp_pacmans.forEach((pac, idx) => {
+      idx++;
+      if (idx == 11) return;
+      if (pac.id == myGame.pacman.id) inTop = true;
+      if (idx != 1) new_scoreText += '\n';
+      new_scoreText += idx + '. ' + pac.getName() + ' ' + pac.score;
+    });
+    if (!inTop) {
+      if (tmp_pacmans.length > 1) new_scoreText += '\n';
+      new_scoreText += (tmp_pacmans.indexOf(myGame.pacman) + 1) + '. ' + myGame.pacman.getName() + ' ' + myGame.pacman.score;
+    }
+    scoreText.setText(new_scoreText);
   },
 
   update: function() {
@@ -218,7 +249,7 @@ var gamePlayState = new Phaser.Class({
           this.maps[chunkID].putTileAt(0, pointerTileX, pointerTileY);
           //this.maps[chunkID].removeTileAt(pointerTileX, pointerTileY);
           myGame.pacman.score += 1;
-          scoreText.setText('Score: ' + myGame.pacman.score);
+          //  scoreText.setText('Score: ' + myGame.pacman.score);
         }
       }
     }
@@ -243,7 +274,8 @@ var gamePlayState = new Phaser.Class({
     var data = {
       x: myGame.pacman.x,
       y: myGame.pacman.y,
-      score: myGame.pacman.score
+      score: myGame.pacman.score,
+      name: myGame.pacman.name
     };
     socket.emit('update', data);
   },

@@ -13,45 +13,53 @@ class Pacman {
    * @param {number} score - Le score du joueur.
    */
 
-  constructor(id, x, y, score) {
+  constructor(id, x, y, score, name) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.score = score;
+    this.name = name;
   }
 }
 
+/* Variable pour la création du serveur */
 const http = require('http');
 const serve = require('koa-static');
 
-const hostname = '192.168.1.27'; //'127.0.0.1';
+const hostname = '192.168.1.21'; //'127.0.0.1';
 const port = 55555;
 
 const Koa = require('koa');
 const app = new Koa();
 
-http.createServer(app.callback());
-app.use(serve('./public'));
+/* Chaînage des promesses */
+require('./lib/creator/createmaze')
+  .then(result => {
+    return require('./lib/splitter/splitmap')
+  })
+  .then(result => {
+    http.createServer(app.callback());
+    app.use(serve('./public'));
 
-var server = app.listen(port, hostname, listen);
+    var server = app.listen(port, hostname, listen);
 
-function listen() {
-  var host = server.address().address;
-  var port = server.address().port;
-  console.log("App listening at http://" + host + ":" + port);
-}
+    function listen() {
+      var host = server.address().address;
+      var port = server.address().port;
+      console.log("App listening at http://" + host + ":" + port);
+    }
 
-create_map();
+    var io = require('socket.io').listen(server);
 
-var io = require('socket.io').listen(server);
+    setInterval(heartbeat, 33);
 
-setInterval(heartbeat, 33);
+    function heartbeat() {
+      io.sockets.emit('heartbeat', liste_pacman);
+    }
 
-function heartbeat() {
-  io.sockets.emit('heartbeat', liste_pacman);
-}
+    io.sockets.on('connection', connection);
+  });
 
-io.sockets.on('connection', connection);
 
 /**
  * Fonction appele lors d'une nouvelle
@@ -66,7 +74,7 @@ function connection(socket) {
   console.log("Nouveau client: " + socket.id);
 
   socket.on('start', (data) => {
-    var new_pacman = new Pacman(socket.id, data.x, data.y, data.score);
+    var new_pacman = new Pacman(socket.id, data.x, data.y, data.score, data.name);
     liste_pacman.push(new_pacman);
   });
 
@@ -81,6 +89,7 @@ function connection(socket) {
     pacman.x = data.x;
     pacman.y = data.y;
     pacman.score = data.score;
+    pacman.name = data.name;
 
   });
 
@@ -92,18 +101,4 @@ function connection(socket) {
       }
     });
   });
-}
-
-function resolveAfter2Seconds() {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      require('./lib/splitter/splitmap')
-      resolve('resolved');
-    }, 2000);
-  });
-}
-
-async function create_map() {
-  require('./lib/creator/createmaze');
-  await resolveAfter2Seconds()
 }

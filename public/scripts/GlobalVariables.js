@@ -22,6 +22,8 @@ var myGame = {
   pacmans: [],
   pacman: null,
 
+  name: '',
+
   // Define common framerate to be referenced in animations
   frameRate: 10
 };

@@ -1,17 +1,26 @@
 class Pacman extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, name) {
     super(scene, x, y, 'pacman');
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
     this.setDisplaySize(myGame.w_shape, myGame.w_shape);
     this.score = 0;
+    this.name = name;
+  }
+
+  getName() {
+    if (this.name.length > 6) {
+      return this.name.substr(0, 6)
+    } else {
+      return this.name;
+    }
   }
 }
 
 class MyPacman extends Pacman {
-  constructor(scene, x, y) {
-    super(scene, x, y);
+  constructor(scene, x, y, name) {
+    super(scene, x, y, name);
     this.scene = scene;
     this.speed = 200;
 
@@ -53,8 +62,8 @@ class MyPacman extends Pacman {
 }
 
 class s_Pacman extends Pacman {
-  constructor(scene, id, x, y) {
-    super(scene, x, y);
+  constructor(scene, id, x, y, name) {
+    super(scene, x, y, name);
     this.id = id;
   }
 
