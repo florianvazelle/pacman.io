@@ -142,6 +142,12 @@ var gamePlayState = new Phaser.Class({
     this.updateEnvironment();
   },
 
+  /**
+   * Définit notament la fonction heartbeat qui va permettre de mettre
+   * à jour les données des autres joueurs
+   *
+   * @method websocket
+   */
   websocket: function() {
     //Websocket
     var data = {
@@ -203,6 +209,11 @@ var gamePlayState = new Phaser.Class({
     });
   },
 
+  /**
+   * Met à jour le tableau des score
+   *
+   * @method updateHightScore
+   */
   updateHightScore: function() {
     var tmp_pacmans = myGame.pacmans.concat(myGame.pacman);
     tmp_pacmans.sort((a, b) => {
@@ -232,7 +243,6 @@ var gamePlayState = new Phaser.Class({
   },
 
   update: function() {
-    //this.updateEnvironment();
     _x = Math.floor(myGame.pacman.x);
     _y = Math.floor(myGame.pacman.y);
     myGame.pacman.body.setVelocity(0);
@@ -280,6 +290,15 @@ var gamePlayState = new Phaser.Class({
     socket.emit('update', data);
   },
 
+  /**
+   * On détermine l'id du chunk sur
+   * lequelle se trouve le joueur
+   *
+   * @method computeChunkID
+   * @param  {int} x - la coordonnée x du pacman
+   * @param  {int} y - la coordonnée y du pacman
+   * @return {int} - l'id du chunk
+   */
   computeChunkID: function(x, y) {
     var tileX = Math.floor(x / myGame.w_shape);
     var tileY = Math.floor(y / myGame.w_shape);
@@ -288,12 +307,28 @@ var gamePlayState = new Phaser.Class({
     return (chunkY * this.nbChunksHorizontal) + chunkX;
   },
 
+  /**
+   * On filtre une première liste de chunk avec une deuxième
+   * pour obtenir une troisieme liste de chunk qui correspond
+   * au chunk qui ne sont pas encore affichés et qui doivent l'être
+   *
+   * @method findDiffArrayElements
+   * @param  {array} firstArray - liste des chunks qui doivent être affichés
+   * @param  {array} secondArray - liste des chunks qui sont déja affichés
+   * @return {array} - liste des chunk qui ne sont pas encore affichés et qui doivent l'être
+   */
   findDiffArrayElements: function(firstArray, secondArray) {
     return firstArray.filter(function(i) {
       return secondArray.indexOf(i) < 0;
     });
   },
 
+  /**
+   * Actualise la vue du joueur, c'est à dire,
+   * permettre la mise à jour des chunks
+   *
+   * @method updateEnvironment
+   */
   updateEnvironment: function() {
     var chunkID = this.computeChunkID(myGame.pacman.x, myGame.pacman.y);
     var chunks = this.listAdjacentChunks(chunkID);
@@ -312,6 +347,12 @@ var gamePlayState = new Phaser.Class({
     }, this);
   },
 
+  /**
+   * Affiche les chunks qui ont été chargé
+   *
+   * @method displayChunk
+   * @param  {string} key - correspond à l'id du fichier json précedement chargé
+   */
   displayChunk: function(key) {
     var map = this.make.tilemap({
       key: key
@@ -334,6 +375,15 @@ var gamePlayState = new Phaser.Class({
     this.displayedChunks.push(chunkID);
   },
 
+  /**
+   * Supprime le chunk n'ont essentiel à la vue,
+   * on supprime aussi le fichier en cache et la collision, précédement
+   * ajouté (sinon phaser va essayer d'afficher le chunk mais les donnée
+   * du layer auront été supprimée)
+   *
+   * @method removeChunk
+   * @param  {int} chunkID - correspond à l'id du chunk que l'on veut supprimer
+   */
   removeChunk: function(chunkID) {
     this.maps[chunkID].destroy();
     this.physics.world.removeCollider(this.listCollider[chunkID]);
@@ -342,6 +392,15 @@ var gamePlayState = new Phaser.Class({
     if (idx > -1) this.displayedChunks.splice(idx, 1);
   },
 
+  /**
+   * Depuis l'id du chunk sur lequelle se trouve
+   * le joueur, nous récupérons tout les chunks autour
+   * du chunk courant
+   *
+   * @method listAdjacentChunks
+   * @param  {int} chunkID - id du chunk courant
+   * @return {array} - l'ensemble des chunk qui doivent etre affichée
+   */
   listAdjacentChunks: function(chunkID) {
     var chunks = [];
     var isAtTop = (chunkID < this.nbChunksHorizontal);

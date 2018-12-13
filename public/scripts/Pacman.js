@@ -9,6 +9,12 @@ class Pacman extends Phaser.Physics.Arcade.Sprite {
     this.name = name;
   }
 
+  /**
+   * Retourne le nom du joueur avec un maximun de 6 caractères
+   *
+   * @method getName
+   * @return {string} - correspond au nom donnée par le joueur
+   */
   getName() {
     if (this.name.length > 6) {
       return this.name.substr(0, 6)
@@ -44,6 +50,16 @@ class MyPacman extends Pacman {
     });
   }
 
+
+  /**
+   * Appeler pour faire bouger le pacman du joueur
+   *
+   * @method move
+   * @param  {boolean} up - oui ou non le joueur appuie veut aller en haut
+   * @param  {boolean} down - oui ou non le joueur appuie veut aller en bas
+   * @param  {boolean} left - oui ou non le joueur appuie veut aller à gauche
+   * @param  {boolean} right - oui ou non le joueur appuie veut aller à droite
+   */
   move(up, down, left, right) {
     if (up) {
       this.scene.physics.moveTo(this, this.x, this.y - myGame.w_shape, this.speed);
@@ -67,12 +83,32 @@ class s_Pacman extends Pacman {
     this.id = id;
   }
 
+  /**
+   * Appeler pour mettre à jour les données du
+   * pacman d'un autre joueur
+   *
+   * @method updateAttr
+   * @param  {int} x - correspond à la nouvelle coordonnées en x d'un autre joueur
+   * @param  {int} y - correspond à la nouvelle coordonnées en y d'un autre joueur
+   * @param  {int} score - correspond au nouveau score d'un autre joueur
+   */
   updateAttr(x, y, score) {
     this.x = x;
     this.y = y;
     this.score = score;
   }
 
+  /**
+   * Appeler pour mettre à jour le groupe du
+   * pacman d'un autre joueur
+   *
+   * @method updateGroup
+   * @param  {type} enemy   description
+   * @param  {type} food    description
+   * @param  {type} neutral description
+   * @param  {type} score   description
+   * @return {type}         description
+   */
   updateGroup(enemy, food, neutral, score) {
     if (this.score > score && !enemy.contains(this)) {
       ((neutral.contains(this)) ? neutral : food).remove(this);
