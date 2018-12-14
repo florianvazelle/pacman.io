@@ -34,7 +34,7 @@ var mainMenuState = new Phaser.Class({
     keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     keyBackspace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
 
-    this.input.keyboard.on('keydown', function(event) {
+    inputKey = this.input.keyboard.on('keydown', function(event) {
       if ('Nickname' == textEntry.text) textEntry.text = '';
       if (event.keyCode === 32 || (event.keyCode >= 65 && event.keyCode <= 90)) {
         textEntry.text += event.key;
@@ -61,5 +61,6 @@ function startGame() {
   game.scene.start('GamePlay');
   startBtn.destroy();
   enteryourpseudo.destroy();
+  inputKey.off('keydown');
   textEntry.destroy();
 }

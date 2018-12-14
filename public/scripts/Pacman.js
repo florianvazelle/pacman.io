@@ -10,16 +10,17 @@ class Pacman extends Phaser.Physics.Arcade.Sprite {
   }
 
   /**
-   * Retourne le nom du joueur avec un maximun de 6 caractères
+   * Retourne le nom du joueur avec un maximun de 10 caractères
    *
    * @method getName
    * @return {string} - correspond au nom donnée par le joueur
    */
   getName() {
-    if (this.name.length > 6) {
-      return this.name.substr(0, 6)
+    let length = this.name.length;
+    if (length > 10) {
+      return this.name.substr(0, 10);
     } else {
-      return this.name;
+      return this.name.concat(" ".repeat(10 - length));
     }
   }
 }

@@ -85,16 +85,13 @@ function connection(socket) {
         pacman = liste_pacman[i];
       }
     }
-    console.log(pacman);
     pacman.x = data.x;
     pacman.y = data.y;
     pacman.score = data.score;
-    pacman.name = data.name;
-
   });
 
   socket.on('disconnect', () => {
-    console.log("un client s'est deconnecte");
+    console.log("un client s'est deconnecté");
     liste_pacman.forEach((pacman, idx) => {
       if (pacman.id == socket.id) {
         liste_pacman.splice(idx, 1);

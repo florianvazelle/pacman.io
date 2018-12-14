@@ -68,13 +68,11 @@ var gamePlayState = new Phaser.Class({
     this.lastChunkID = (this.nbChunksHorizontal * this.nbChunksVertical) - 1;
 
     /* Score */
-    scoreText = this.add.text(16, 16, 'Score: 0', {
+    scoreText = this.add.text(16, 16, '', {
       fontSize: '32px',
-      fill: '#fff',
-      backgroundColor: '#696969'
+      fill: '#fff'
     });
-    scoreText.setScrollFactor(0);
-    scoreText.setDepth(5);
+    scoreText.setStroke('#000', 16).setScrollFactor(0).setDepth(5);
 
     /* Mobile configuration */
     if (myGame.isMobile) {
@@ -226,18 +224,16 @@ var gamePlayState = new Phaser.Class({
       return 0;
     });
 
-    var new_scoreText = '';
-    var inTop = false;
-    tmp_pacmans.forEach((pac, idx) => {
-      idx++;
-      if (idx == 11) return;
+    let new_scoreText = 'Leaderboard';
+    let inTop = false;
+    let length = (tmp_pacmans.length <= 5) ? tmp_pacmans.length : 5;
+    for (var idx = 1; idx < length; idx++) {
+      let pac = tmp_pacmans[idx - 1];
       if (pac.id == myGame.pacman.id) inTop = true;
-      if (idx != 1) new_scoreText += '\n';
-      new_scoreText += idx + '. ' + pac.getName() + ' ' + pac.score;
-    });
+      new_scoreText += '\n' + idx + '. ' + pac.getName() + ' ' + pac.score;
+    }
     if (!inTop) {
-      if (tmp_pacmans.length > 1) new_scoreText += '\n';
-      new_scoreText += (tmp_pacmans.indexOf(myGame.pacman) + 1) + '. ' + myGame.pacman.getName() + ' ' + myGame.pacman.score;
+      new_scoreText += '\n' + (tmp_pacmans.indexOf(myGame.pacman) + 1) + '. ' + myGame.pacman.getName() + ' ' + myGame.pacman.score;
     }
     scoreText.setText(new_scoreText);
   },
@@ -255,11 +251,8 @@ var gamePlayState = new Phaser.Class({
       var pointerTileY = map.worldToTileY(_y);
       if (tile != null) {
         if (tile.index == 1) {
-          //  console.log(this.maps[chunkID])
           this.maps[chunkID].putTileAt(0, pointerTileX, pointerTileY);
-          //this.maps[chunkID].removeTileAt(pointerTileX, pointerTileY);
           myGame.pacman.score += 1;
-          //  scoreText.setText('Score: ' + myGame.pacman.score);
         }
       }
     }
@@ -280,12 +273,10 @@ var gamePlayState = new Phaser.Class({
       }
     }
 
-
     var data = {
       x: myGame.pacman.x,
       y: myGame.pacman.y,
-      score: myGame.pacman.score,
-      name: myGame.pacman.name
+      score: myGame.pacman.score
     };
     socket.emit('update', data);
   },
