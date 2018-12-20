@@ -227,7 +227,7 @@ var gamePlayState = new Phaser.Class({
     let new_scoreText = 'Leaderboard';
     let inTop = false;
     let length = (tmp_pacmans.length <= 5) ? tmp_pacmans.length : 5;
-    for (var idx = 1; idx < length; idx++) {
+    for (var idx = 1; idx <= length; idx++) {
       let pac = tmp_pacmans[idx - 1];
       if (pac.id == myGame.pacman.id) inTop = true;
       new_scoreText += '\n' + idx + '. ' + pac.getName() + ' ' + pac.score;
