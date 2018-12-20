@@ -127,6 +127,14 @@ var gamePlayState = new Phaser.Class({
       }
     });
 
+    this.physics.add.overlap(myGame.pacman, enemy, (pacman, oPacman) => {
+      let x = random(myGame.cols()) * myGame.w_shape;
+      let y = random(myGame.rows()) * myGame.w_shape;
+      myGame.pacman.x = x;
+      myGame.pacman.y = y;
+      myGame.pacman.score = 0;
+    });
+
     // Get camera
     cam = this.cameras.main;
     var worldWidth = masterData.nbChunksHorizontal * masterData.chunkWidth; // width of the world in tiles

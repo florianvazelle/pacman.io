@@ -13,17 +13,28 @@ var mainMenuState = new Phaser.Class({
 
   create: function() {
     console.log("MainMenu");
-    startBtn = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'startBtn').setInteractive();
+
+    /* Create button for start gameplay */
+    startBtn = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + 100, 'startBtn').setInteractive();
     startBtn.on('pointerdown', startGame);
 
-    enteryourpseudo = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Enter your pseudo:', {
-      font: '32px Courier',
+    /* Add title */
+    title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, 'Pacman.io', {
+      font: '64px PacFont',
+      fill: '#ffff00'
+    });
+    title.setOrigin(0.5);
+
+    /* Add enteryourpseudo */
+    enteryourpseudo = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 70, 'Enter your pseudo:', {
+      font: '32px PacFont',
       fill: '#ffffff',
       align: 'center'
     });
     enteryourpseudo.setOrigin(0.5);
 
-    textEntry = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 50, 'Nickname', {
+    /* Add the text entry by client */
+    textEntry = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 20, 'Nickname', {
       font: '32px Courier',
       fill: '#fff',
       backgroundColor: '#696969',
@@ -40,7 +51,6 @@ var mainMenuState = new Phaser.Class({
         textEntry.text += event.key;
       }
     });
-
     bool = 0;
   },
 
@@ -59,6 +69,9 @@ myGame.scenes.push(mainMenuState);
 function startGame() {
   myGame.name = textEntry.text;
   game.scene.start('GamePlay');
+
+  /* Destroy all elements create in this scene */
+  title.destroy();
   startBtn.destroy();
   enteryourpseudo.destroy();
   inputKey.off('keydown');

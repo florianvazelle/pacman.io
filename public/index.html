@@ -26,9 +26,19 @@
       html, body { width:100%; height:100%; }
       canvas { display:block; }
     </style>
+
+    <style media='screen' type='text/css'>
+      @font-face {
+        font-family: PacFont;
+        src: url('./assets/fonts/PacFont.ttf');
+        font-weight:400;
+        font-weight:normal;
+      }
+    </style>
   </head>
 
   <body>
+    <div style="font-family:font1; position:absolute; left:-1000px; visibility:hidden;">.</div>
     <script>
 
       var socket = io();
