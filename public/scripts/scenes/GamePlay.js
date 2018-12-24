@@ -135,6 +135,10 @@ var gamePlayState = new Phaser.Class({
       myGame.pacman.score = 0;
     });
 
+    this.physics.add.overlap(myGame.pacman, food, (pacman, oPacman) => {
+      myGame.pacman.score += oPacman.score;
+    });
+
     // Get camera
     cam = this.cameras.main;
     var worldWidth = masterData.nbChunksHorizontal * masterData.chunkWidth; // width of the world in tiles
@@ -270,12 +274,12 @@ var gamePlayState = new Phaser.Class({
       plugin.setDirection(souris);
       var cursors = plugin.getCursors();
 
-      myGame.pacman.move(cursors.up, cursors.down, cursors.left, cursors.right);
+      myGame.pacman.move(cursors.up, cursors.down, cursors.left, cursors.right, map);
       if (cursors.up || cursors.down || cursors.left || cursors.right) {
         this.updateEnvironment();
       }
     } else {
-      myGame.pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown);
+      myGame.pacman.move(upKey.isDown, downKey.isDown, leftKey.isDown, rightKey.isDown, map);
       if (upKey.isDown || downKey.isDown || leftKey.isDow || rightKey.isDown) {
         this.updateEnvironment();
       }

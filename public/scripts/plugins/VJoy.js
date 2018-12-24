@@ -107,9 +107,10 @@ class VJoy extends Phaser.Plugins.BasePlugin {
   createJoystick(mouse) {
     this.active = true;
 
-    this.imageGroup.forEach((sprite) => {
+    this.imageGroup.forEach((sprite, idx) => {
       sprite.visible = true;
       sprite.setScrollFactor(0);
+      sprite.setDepth(idx + 5)
 
       sprite.x = mouse.x;
       sprite.y = mouse.y;

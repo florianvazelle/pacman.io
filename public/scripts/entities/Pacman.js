@@ -60,18 +60,49 @@ class MyPacman extends Pacman {
    * @param  {boolean} down - oui ou non le joueur appuie veut aller en bas
    * @param  {boolean} left - oui ou non le joueur appuie veut aller à gauche
    * @param  {boolean} right - oui ou non le joueur appuie veut aller à droite
+   * @param {object} map -
    */
-  move(up, down, left, right) {
+  move(up, down, left, right, map) {
+    var _x = this.x
+    var _y = this.y
     if (up) {
+      if (map != undefined) {
+        var tile = map.getTileAtWorldXY(_x, _y - myGame.w_shape);
+        if (tile != null) {
+          _x = Math.ceil(_x / myGame.w_shape) * myGame.w_shape - myGame.w_shape / 2;
+          this.x = _x;
+        }
+      }
       this.scene.physics.moveTo(this, this.x, this.y - myGame.w_shape, this.speed);
       this.anims.play("up", 30);
     } else if (down) {
+      if (map != undefined) {
+        var tile = map.getTileAtWorldXY(_x, _y + myGame.w_shape);
+        if (tile != null) {
+          _x = Math.ceil(_x / myGame.w_shape) * myGame.w_shape - myGame.w_shape / 2;
+          this.x = _x;
+        }
+      }
       this.scene.physics.moveTo(this, this.x, this.y + myGame.w_shape, this.speed);
       this.anims.play("down", 30);
     } else if (left) {
+      if (map != undefined) {
+        var tile = map.getTileAtWorldXY(_x - myGame.w_shape, _y);
+        if (tile != null) {
+          _y = Math.ceil(_y / myGame.w_shape) * myGame.w_shape - myGame.w_shape / 2;
+          this.y = _y;
+        }
+      }
       this.scene.physics.moveTo(this, this.x - myGame.w_shape, this.y, this.speed);
       this.anims.play("left", 30);
     } else if (right) {
+      if (map != undefined) {
+        var tile = map.getTileAtWorldXY(_x + myGame.w_shape, _y);
+        if (tile != null) {
+          _y = Math.ceil(_y / myGame.w_shape) * myGame.w_shape - myGame.w_shape / 2;
+          this.y = _y;
+        }
+      }
       this.scene.physics.moveTo(this, this.x + myGame.w_shape, this.y, this.speed);
       this.anims.play("right", 30);
     }
@@ -104,11 +135,10 @@ class s_Pacman extends Pacman {
    * pacman d'un autre joueur
    *
    * @method updateGroup
-   * @param  {type} enemy   description
-   * @param  {type} food    description
-   * @param  {type} neutral description
-   * @param  {type} score   description
-   * @return {type}         description
+   * @param  {object} enemy - Groupe avec tout les pacmans qui ont un score supérieur à celui du pacman du client
+   * @param  {object} food - Groupe avec tout les pacmans qui ont un score infèrieur à celui pacman du client
+   * @param  {object} neutral - Groupe avec tout les pacmans qui ont le meme score que le pacman du client
+   * @param  {int} score - score du pacman du client
    */
   updateGroup(enemy, food, neutral, score) {
     if (this.score > score && !enemy.contains(this)) {
