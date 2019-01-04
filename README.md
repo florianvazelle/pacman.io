@@ -1,7 +1,7 @@
 # pacman.io
 
 ### Prérequis
- * Nodejs
+ * Nodejs v10.15.0
 
 ### Installation
 Pour installer les dépendances du projet :

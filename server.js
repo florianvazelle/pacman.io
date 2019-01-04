@@ -26,7 +26,7 @@ class Pacman {
 const http = require('http');
 const serve = require('koa-static');
 
-const hostname = '192.168.1.21'; //'127.0.0.1';
+const hostname = '127.0.0.1';
 const port = 55555;
 
 const Koa = require('koa');
